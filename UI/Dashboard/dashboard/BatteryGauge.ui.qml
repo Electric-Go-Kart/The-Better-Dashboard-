@@ -8,14 +8,20 @@ Check out https://doc.qt.io/qtcreator/creator-quick-ui-forms.html for details on
 */
 import QtQuick
 import QtQuick.Controls
-
 //import QtQuick.Studio.DesignEffects
 
 Item {
     id: batteryGauge
     width: 20
     height: 400
-    property int level: dashboardcontroller.charge //75
+    property real level: 100   // starts at 100%
+
+        Connections {
+            target: dashboardController
+            onLeftSocChanged: {
+                batteryGauge.level = soc; // updated directly from MotorDataProcessor via DashboardController
+            }
+        }
 
     Rectangle {
         id: frame

@@ -20,7 +20,8 @@ Item {
         // Temporary test variable — REMOVE later
         property bool fakeDirection: true
         opacity: 1
-        text: /*dashboardcontroller.direction*/ fakeDirection ? "Forward" : "Reverse"
+        //onClicked: dashboardcontroller.updateDirection
+        text: /*dashboardcontroller.getDirection*/  fakeDirection ? "Forward" : "Reverse"
         anchors.fill: parent
         rotation: 0
         flat: false

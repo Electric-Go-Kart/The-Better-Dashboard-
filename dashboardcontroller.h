@@ -22,12 +22,12 @@ public:
     explicit DashboardController(QObject *parent = nullptr);
 
     //getters for C++
-    double getSpeed()const;
-    double getRPM()const;
-    int getCharge()const;
-    QString getDirection()const;
-    bool getState()const;
-    float getCurrent()const;
+    double getSpeed() const;
+    double getRPM() const;
+    int getCharge() const;
+    QString getDirection() const;
+    bool getState() const;
+    float getCurrent() const;
 
 signals:
     void speedChange(double speed);
@@ -52,8 +52,6 @@ private:
     bool direction;
     bool state;
     float current;
-
-
 };
 
 #endif // DASHBOARDCONTROLLER_H

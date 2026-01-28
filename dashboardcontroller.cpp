@@ -1,6 +1,7 @@
 #include "dashboardcontroller.h"
 
-DashboardController::DashboardController(QObject *parent) {
+DashboardController::DashboardController(QObject *parent)
+{
     rpm = 0.0;
     charge = 100;
     direction = "N";
@@ -9,37 +10,45 @@ DashboardController::DashboardController(QObject *parent) {
 }
 
 //getter functions
-double DashboardController::getSpeed()const{
+double DashboardController::getSpeed() const
+{
     return speed;
 }
-double DashboardController::getRPM()const{
+double DashboardController::getRPM() const
+{
     return rpm;
 }
-int DashboardController::getCharge()const{
+int DashboardController::getCharge() const
+{
     return charge;
 }
-QString DashboardController::getDirection()const{
+QString DashboardController::getDirection() const
+{
     return direction ? "Forward" : "Reverse";
     //return direction;
 }
-bool DashboardController::getState()const{
+bool DashboardController::getState() const
+{
     return state;
 }
-float DashboardController::getCurrent()const{
+float DashboardController::getCurrent() const
+{
     return current;
 }
 
-
 //setter functions (Slots)
-void DashboardController::updateSpeed(double rpm){
+void DashboardController::updateSpeed(double rpm)
+{
     double speed = rpm / 10;
     emit speedChange(speed);
 }
-void DashboardController::updateRPM(double rpm){}
-void DashboardController::updateCharge(int charge){
+void DashboardController::updateRPM(double rpm) {}
+void DashboardController::updateCharge(int charge)
+{
     emit batteryChange(charge);
 }
-void DashboardController::updateDirection(){
+void DashboardController::updateDirection()
+{
     // toggle state
     direction = !direction;
 
@@ -53,5 +62,5 @@ void DashboardController::updateDirection(){
     emit directionChange(direction);
 */
 }
-void DashboardController::updateState(bool state){}
-void DashboardController::updateCurrent(float current){}
+void DashboardController::updateState(bool state) {}
+void DashboardController::updateCurrent(float current) {}

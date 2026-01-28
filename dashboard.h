@@ -1,15 +1,15 @@
 #ifndef DASHBOARD_H
 #define DASHBOARD_H
 
-#include <QMainWindow>
-#include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QMainWindow>
 #include <QPushButton>
-#include "speedometer.h"
+#include <QVBoxLayout>
 #include "batterypanel.h"
-#include "test.h"
 #include "dashboardcontroller.h"
 #include "directionpanel.h"
+#include "speedometer.h"
+#include "test.h"
 
 class Dashboard : public QMainWindow
 {
@@ -25,7 +25,7 @@ private:
     BatteryPanel *batteryPanel;
     QPushButton *closeButton;
     DirectionPanel *directionPanel;
-    Test* test;
-    DashboardController* controller;
+    Test *test;
+    DashboardController *controller;
 };
 #endif // DASHBOARD_H

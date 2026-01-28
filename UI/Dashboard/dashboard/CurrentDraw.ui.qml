@@ -13,7 +13,14 @@ Item {
     id: currentDraw
     width: 20
     height: 400
-    property int level: 60 //dashboardcontroller.charge
+    property real level: 0   // starts at 100%
+
+        Connections {
+            target: dashboardController
+            onLeftCurrentChanged: {
+                currentDraw.level = current; // updated directly from MotorDataProcessor via DashboardController
+            }
+        }
 
     Rectangle {
         id: frame
@@ -41,7 +48,7 @@ Item {
                 orientation: Gradient.Vertical
             }
 
-            height: parent.height * (currentDraw.level / 100)
+            height: parent.height * (currentDraw.level / 40)
             radius: 7
 
             Behavior on height {

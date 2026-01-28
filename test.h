@@ -2,9 +2,8 @@
 #ifndef TEST_H
 #define TEST_H
 
-
-#include <QTimer>
 #include <QObject>
+#include <QTimer>
 
 class Test : public QObject
 {
@@ -19,7 +18,6 @@ signals:
     void batteryChange(int charge);
 
 protected:
-
 private slots:
     void updateSpeed();
     void updateBattery();
