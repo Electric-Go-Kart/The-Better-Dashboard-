@@ -11,8 +11,8 @@ import QtQuick.Controls
 
 Item {
     id: root
-    width: 800
-    height: 480
+    width: Screen.width //800
+    height: Screen.height //480
 
     Speedometer {
         id: speedometer

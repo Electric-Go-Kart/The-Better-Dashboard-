@@ -8,9 +8,11 @@ CANController::CANController(QObject *parent)
     : QObject(parent)
 {
     // REMOVE after real CAN hardware is ready
+    /*
     QTimer *fakeTimer = new QTimer(this);
     connect(fakeTimer, &QTimer::timeout, this, &CANController::generateFakeCanData);
     fakeTimer->start(600); // update every 200ms
+    */
 
     // Connect Motor Processors to outgoing signals
     connect(&leftMotor, &MotorDataProcessor::rpmUpdated,
@@ -114,6 +116,7 @@ float CANController::decodeVoltage(const QByteArray &p)
     return raw / 10.0f;
 }
 
+/*
 void CANController::generateFakeCanData()
 {
     // Fake Left Motor
@@ -130,3 +133,4 @@ void CANController::generateFakeCanData()
     //emit rightPowerReceived(QRandomGenerator::global()->bounded(0.0f, 2000.0f));
     //emit rightSocReceived(QRandomGenerator::global()->bounded(0.0f, 100.0f));
 }
+*/

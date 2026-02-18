@@ -30,7 +30,7 @@ signals:
 private slots:
     void processIncomingFrame();
     //for testing
-    void generateFakeCanData();
+    //void generateFakeCanData();
 
 private:
     QCanBusDevice *device = nullptr;
