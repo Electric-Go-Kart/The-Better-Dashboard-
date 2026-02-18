@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 17.0.2, 2026-02-18T15:18:30. -->
+<!-- Written by QtCreator 17.0.2, 2026-02-18T15:41:43. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -180,17 +180,20 @@
        <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">RemoteLinux.DirectUploadStep</value>
        <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedFiles">
         <value type="QString">C:/Users/nickd/AppData/Local/Temp/QtCreator-nJRFcL/staging-8a8c7a195f8371c5/usr/bin/appQMLCDash</value>
+        <value type="QString">C:/Users/nickd/AppData/Local/Temp/QtCreator-sqIzlO/staging-fc0f94b6efb5215c/usr/bin/appQMLCDash</value>
         <value type="QString">C:/Users/nickd/AppData/Local/Temp/QtCreator-nJRFcL/staging-8a8c7a195f8371c5/usr/bin/appQMLCDash</value>
         <value type="QString">C:/Users/nickd/AppData/Local/Temp/QtCreator-nJRFcL/staging-8a8c7a195f8371c5/usr/bin/appQMLCDash</value>
         <value type="QString">C:/Users/nickd/AppData/Local/Temp/QtCreator-nJRFcL/staging-8a8c7a195f8371c5/usr/bin/appQMLCDash</value>
        </valuelist>
        <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedHosts">
         <value type="QString">169.254.24.33</value>
+        <value type="QString">169.254.199.41</value>
         <value type="QString">169.254.37.114</value>
         <value type="QString">169.254.199.41</value>
         <value type="QString">169.254.187.229</value>
        </valuelist>
        <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedRemotePaths">
+        <value type="QString">/usr/bin</value>
         <value type="QString">/usr/bin</value>
         <value type="QString">/usr/bin</value>
         <value type="QString">/usr/bin</value>
@@ -201,15 +204,18 @@
         <value type="QString">C:/Qt/6.10.0/Boot2Qt/raspberrypi-armv8/toolchain/sysroots/cortexa53-poky-linux</value>
         <value type="QString">C:/Qt/6.10.0/Boot2Qt/raspberrypi-armv8/toolchain/sysroots/cortexa53-poky-linux</value>
         <value type="QString">C:/Qt/6.10.0/Boot2Qt/raspberrypi-armv8/toolchain/sysroots/cortexa53-poky-linux</value>
+        <value type="QString">C:/Qt/6.10.0/Boot2Qt/raspberrypi-armv8/toolchain/sysroots/cortexa53-poky-linux</value>
        </valuelist>
        <valuelist type="QVariantList" key="RemoteLinux.LastDeployedLocalTimes">
         <value type="QDateTime">2026-02-18T14:37:51.946</value>
+        <value type="QDateTime">2026-02-18T15:34:40.840</value>
         <value type="QDateTime">2026-02-18T13:05:31.894</value>
         <value type="QDateTime">2026-02-18T14:58:03.278</value>
         <value type="QDateTime">2026-02-18T11:46:51.366</value>
        </valuelist>
        <valuelist type="QVariantList" key="RemoteLinux.LastDeployedRemoteTimes">
         <value type="QDateTime">2026-02-18T13:28:42.000</value>
+        <value type="QDateTime">2026-02-18T14:25:07.000</value>
         <value type="QDateTime">2026-02-18T11:59:40.000</value>
         <value type="QDateTime">2026-02-18T13:48:30.000</value>
         <value type="QDateTime">2026-02-18T11:44:51.000</value>
@@ -275,7 +281,7 @@
      <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">appQMLCDash</value>
      <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">true</value>
      <value type="QString" key="QdbRunConfig.LocalExecutable">C:\Users\nickd\Desktop\QMLCDash_GitHub_Clone\The-Better-Dashboard-\build\6.10.0-raspberrypi-armv8-Debug\appQMLCDash</value>
-     <value type="QString" key="QdbRunConfig.RemoteExecutable">ssh://root@169.254.199.41</value>
+     <value type="QString" key="QdbRunConfig.RemoteExecutable">ssh://root@169.254.199.41/usr/bin/appQMLCDash</value>
      <value type="int" key="RemoteLinux.EnvironmentAspect.Version">1</value>
      <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
      <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
@@ -300,17 +306,20 @@
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">RemoteLinux.DirectUploadStep</value>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedFiles">
        <value type="QString">C:/Users/nickd/AppData/Local/Temp/QtCreator-nJRFcL/staging-8a8c7a195f8371c5/usr/bin/appQMLCDash</value>
+       <value type="QString">C:/Users/nickd/AppData/Local/Temp/QtCreator-sqIzlO/staging-fc0f94b6efb5215c/usr/bin/appQMLCDash</value>
        <value type="QString">C:/Users/nickd/AppData/Local/Temp/QtCreator-nJRFcL/staging-8a8c7a195f8371c5/usr/bin/appQMLCDash</value>
        <value type="QString">C:/Users/nickd/AppData/Local/Temp/QtCreator-nJRFcL/staging-8a8c7a195f8371c5/usr/bin/appQMLCDash</value>
        <value type="QString">C:/Users/nickd/AppData/Local/Temp/QtCreator-nJRFcL/staging-8a8c7a195f8371c5/usr/bin/appQMLCDash</value>
       </valuelist>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedHosts">
        <value type="QString">169.254.24.33</value>
+       <value type="QString">169.254.199.41</value>
        <value type="QString">169.254.37.114</value>
        <value type="QString">169.254.199.41</value>
        <value type="QString">169.254.187.229</value>
       </valuelist>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedRemotePaths">
+       <value type="QString">/usr/bin</value>
        <value type="QString">/usr/bin</value>
        <value type="QString">/usr/bin</value>
        <value type="QString">/usr/bin</value>
@@ -321,15 +330,18 @@
        <value type="QString">C:/Qt/6.10.0/Boot2Qt/raspberrypi-armv8/toolchain/sysroots/cortexa53-poky-linux</value>
        <value type="QString">C:/Qt/6.10.0/Boot2Qt/raspberrypi-armv8/toolchain/sysroots/cortexa53-poky-linux</value>
        <value type="QString">C:/Qt/6.10.0/Boot2Qt/raspberrypi-armv8/toolchain/sysroots/cortexa53-poky-linux</value>
+       <value type="QString">C:/Qt/6.10.0/Boot2Qt/raspberrypi-armv8/toolchain/sysroots/cortexa53-poky-linux</value>
       </valuelist>
       <valuelist type="QVariantList" key="RemoteLinux.LastDeployedLocalTimes">
        <value type="QDateTime">2026-02-18T14:37:51.946</value>
+       <value type="QDateTime">2026-02-18T15:34:40.840</value>
        <value type="QDateTime">2026-02-18T13:05:31.894</value>
        <value type="QDateTime">2026-02-18T14:58:03.278</value>
        <value type="QDateTime">2026-02-18T11:46:51.366</value>
       </valuelist>
       <valuelist type="QVariantList" key="RemoteLinux.LastDeployedRemoteTimes">
        <value type="QDateTime">2026-02-18T13:28:42.000</value>
+       <value type="QDateTime">2026-02-18T14:25:07.000</value>
        <value type="QDateTime">2026-02-18T11:59:40.000</value>
        <value type="QDateTime">2026-02-18T13:48:30.000</value>
        <value type="QDateTime">2026-02-18T11:44:51.000</value>
@@ -395,7 +407,7 @@
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">appQMLCDash</value>
     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">true</value>
     <value type="QString" key="QdbRunConfig.LocalExecutable">C:\Users\nickd\Desktop\QMLCDash_GitHub_Clone\The-Better-Dashboard-\build\6.10.0-raspberrypi-armv8-Debug\appQMLCDash</value>
-    <value type="QString" key="QdbRunConfig.RemoteExecutable">ssh://root@169.254.199.41</value>
+    <value type="QString" key="QdbRunConfig.RemoteExecutable">ssh://root@169.254.199.41/usr/bin/appQMLCDash</value>
     <value type="int" key="RemoteLinux.EnvironmentAspect.Version">1</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>

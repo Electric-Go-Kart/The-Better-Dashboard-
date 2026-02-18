@@ -36,8 +36,6 @@ qt_add_qml_module(appQMLCDash
         QML_FILES UI/Dashboard/dashboard/ShutDown.ui.qml
         QML_FILES UI/Dashboard/dashboard/Speedometer.ui.qml
 
-        RESOURCES UI/Dashboard/images/CSU-Ram-Rev.png
-
         #QML_FILES Speedometer.qml
         #QML_FILES Dashboard.qml
 )
