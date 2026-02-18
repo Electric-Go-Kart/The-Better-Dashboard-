@@ -4,12 +4,18 @@ project(QMLCDash VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick SerialBus)
+find_package(Qt6 REQUIRED COMPONENTS Core Quick SerialBus)
 
-qt_standard_project_setup(REQUIRES 6.8)
+qt_standard_project_setup(REQUIRES 6.2)
+qt_policy(SET QTP0001 NEW)
+qt_policy(SET QTP0004 NEW)
 
 qt_add_executable(appQMLCDash
     main.cpp
+)
+
+qt_add_executable(vescCanSim
+    tools/vesc_can_sim.cpp
 )
 
 qt_add_qml_module(appQMLCDash
@@ -57,8 +63,18 @@ target_link_libraries(appQMLCDash
     PRIVATE Qt6::Quick Qt${QT_VERSION_MAJOR}::SerialBus
 )
 
+target_link_libraries(vescCanSim
+    PRIVATE Qt6::Core Qt${QT_VERSION_MAJOR}::SerialBus
+)
+
 include(GNUInstallDirs)
 install(TARGETS appQMLCDash
+    BUNDLE DESTINATION .
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+install(TARGETS vescCanSim
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
