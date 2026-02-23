@@ -3,9 +3,11 @@
 
 #include <QObject>
 #include <deque>
+#include <QQmlEngine>
 
 class MotorDataProcessor : public QObject {
     Q_OBJECT
+    QML_ELEMENT
 
 public:
     explicit MotorDataProcessor(QObject *parent = nullptr);

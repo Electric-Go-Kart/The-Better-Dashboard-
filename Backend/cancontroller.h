@@ -5,9 +5,11 @@
 #include <QCanBus>
 #include <QCanBusDevice>
 #include "MotorDataProcessor.h"
+#include <QQmlEngine>
 
 class CANController : public QObject {
     Q_OBJECT
+    QML_ELEMENT
 
 public:
     explicit CANController(QObject *parent = nullptr);
@@ -40,8 +42,8 @@ private:
     MotorDataProcessor rightMotor;
 
     // Example CAN IDs — replace with correct ones if needed
-    const int LEFT_MOTOR_FRAME_ID  = 0x09;
-    const int RIGHT_MOTOR_FRAME_ID = 0x0A;
+    const int LEFT_MOTOR_FRAME_ID  = 0x901; //0x09;
+    const int RIGHT_MOTOR_FRAME_ID = 0x902; //0x0A;
 
     float decodeCurrent(const QByteArray &payload);
     int decodeRpm(const QByteArray &payload);
