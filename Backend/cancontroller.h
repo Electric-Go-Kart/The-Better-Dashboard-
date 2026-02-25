@@ -14,6 +14,7 @@ class CANController : public QObject {
 public:
     explicit CANController(QObject *parent = nullptr);
     bool initialize(const QString &interfaceName = "vcan0");
+    void start();
 
 signals:
     // Pass values to DashboardController
@@ -36,6 +37,7 @@ private slots:
 
 private:
     QCanBusDevice *device = nullptr;
+    QCanBusDevice *device2 = nullptr;
 
     // Two motors: left and right
     MotorDataProcessor leftMotor;
