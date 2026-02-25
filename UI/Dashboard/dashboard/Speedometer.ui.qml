@@ -18,7 +18,7 @@ Item {
 
        Connections {
            target: dashboardController
-           onLeftRpmChanged: {
+           function onRpmChanged(rpm) {
                root.speed = rpm; // value from MotorDataProcessor via DashboardController
            }
        }
@@ -42,7 +42,7 @@ Item {
 
         Image {
                 id: ramsLogo
-                visible: DashboardController.locked
+                visible: false
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
                 source: "../images/CSU-Ram-Rev.png"

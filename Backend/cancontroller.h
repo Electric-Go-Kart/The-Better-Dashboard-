@@ -17,23 +17,15 @@ public:
     void start();
 
 signals:
-    // Pass values to DashboardController
-    void leftMotorRpmUpdated(int rpm);
-    void leftMotorCurrentUpdated(float current);
-    void leftMotorVoltageUpdated(float voltage);
-    void leftMotorPowerUpdated(float power);
-    void leftMotorSocUpdated(float soc);
-
-    void rightMotorRpmUpdated(int rpm);
-    void rightMotorCurrentUpdated(float current);
-    void rightMotorVoltageUpdated(float voltage);
-    void rightMotorPowerUpdated(float power);
-    void rightMotorSocUpdated(float soc);
+    // Single motor values published to DashboardController
+    void motorRpmUpdated(int rpm);
+    void motorCurrentUpdated(float current);
+    void motorVoltageUpdated(float voltage);
+    void motorPowerUpdated(float power);
+    void motorSocUpdated(float soc);
 
 private slots:
     void processIncomingFrame();
-    //for testing
-    void generateFakeCanData();
 
 private:
     QCanBusDevice *device = nullptr;

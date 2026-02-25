@@ -12,33 +12,20 @@ public:
     explicit DashboardController(QObject *parent = nullptr);
 
 signals:
-    // Left Motor UI
-    void leftRpmChanged(int rpm);
-    void leftCurrentChanged(float current);
-    void leftVoltageChanged(float voltage);
-    void leftPowerChanged(float power);
-    void leftSocChanged(float soc);
-
-    // Right Motor UI
-    void rightRpmChanged(int rpm);
-    void rightCurrentChanged(float current);
-    void rightVoltageChanged(float voltage);
-    void rightPowerChanged(float power);
-    void rightSocChanged(float soc);
+    // Single motor UI signals
+    void rpmChanged(int rpm);
+    void currentChanged(float current);
+    void voltageChanged(float voltage);
+    void powerChanged(float power);
+    void socChanged(float soc);
 
 public slots:
     // Slots receiving values from CANController
-    void updateLeftRpm(int rpm);
-    void updateLeftCurrent(float c);
-    void updateLeftVoltage(float v);
-    void updateLeftPower(float p);
-    void updateLeftSoc(float soc);
-
-    void updateRightRpm(int rpm);
-    void updateRightCurrent(float c);
-    void updateRightVoltage(float v);
-    void updateRightPower(float p);
-    void updateRightSoc(float soc);
+    void updateRpm(int rpm);
+    void updateCurrent(float c);
+    void updateVoltage(float v);
+    void updatePower(float p);
+    void updateSoc(float soc);
 };
 
 #endif 

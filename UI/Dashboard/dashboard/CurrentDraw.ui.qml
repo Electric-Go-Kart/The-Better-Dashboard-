@@ -18,7 +18,7 @@ Item {
 
         Connections {
             target: dashboardController
-            onLeftCurrentChanged: {
+            function onCurrentChanged(current) {
                 currentDraw.level = current; // updated directly from MotorDataProcessor via DashboardController
             }
         }
