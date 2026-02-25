@@ -4,12 +4,18 @@ project(QMLCDash VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick SerialBus)
+find_package(Qt6 REQUIRED COMPONENTS Core Quick SerialBus)
 
-qt_standard_project_setup(REQUIRES 6.8)
+qt_standard_project_setup(REQUIRES 6.2)
+qt_policy(SET QTP0001 NEW)
+qt_policy(SET QTP0004 NEW)
 
 qt_add_executable(appQMLCDash
     main.cpp
+)
+
+qt_add_executable(vescCanSim
+    tools/vesc_can_sim.cpp
 )
 
 qt_add_qml_module(appQMLCDash
@@ -18,29 +24,33 @@ qt_add_qml_module(appQMLCDash
     QML_FILES
     Main.qml
         #SOURCES dashboardcontroller.h dashboardcontroller.cpp
-        SOURCES test.h test.cpp
-        SOURCES Backend/cancontroller.h Backend/cancontroller.cpp
-        SOURCES Backend/dashboardcontroller.h Backend/dashboardcontroller.cpp
-        SOURCES Backend/motordataprocessor.h Backend/motordataprocessor.cpp
+        SOURCES
+            test.h test.cpp
+            Backend/cancontroller.h Backend/cancontroller.cpp
+            Backend/dashboardcontroller.h Backend/dashboardcontroller.cpp
+            Backend/motordataprocessor.h Backend/motordataprocessor.cpp
 
         QML_FILES
-        QML_FILES UI/Dashboard/App.qml
-        QML_FILES UI/Dashboard/dashboard/BatteryGauge.ui.qml
-        QML_FILES UI/Dashboard/dashboard/CurrentDraw.ui.qml
-        QML_FILES UI/Dashboard/dashboard/Dashboard.ui.qml
-        QML_FILES UI/Dashboard/dashboard/DirectionButton.ui.qml
-        QML_FILES UI/Dashboard/dashboard/Lights.ui.qml
-        QML_FILES UI/Dashboard/dashboard/Lock.ui.qml
-        QML_FILES UI/Dashboard/dashboard/Park.ui.qml
-        QML_FILES UI/Dashboard/dashboard/Settings.ui.qml
-        QML_FILES UI/Dashboard/dashboard/ShutDown.ui.qml
-        QML_FILES UI/Dashboard/dashboard/Speedometer.ui.qml
+            UI/Dashboard/App.qml
+            UI/Dashboard/dashboard/BatteryGauge.ui.qml
+            UI/Dashboard/dashboard/CurrentDraw.ui.qml
+            UI/Dashboard/dashboard/Dashboard.ui.qml
+            UI/Dashboard/dashboard/DirectionButton.ui.qml
+            UI/Dashboard/dashboard/Lights.ui.qml
+            UI/Dashboard/dashboard/Lock.ui.qml
+            UI/Dashboard/dashboard/Park.ui.qml
+            UI/Dashboard/dashboard/Settings.ui.qml
+            UI/Dashboard/dashboard/ShutDown.ui.qml
+            UI/Dashboard/dashboard/Speedometer.ui.qml
 
         RESOURCES UI/Dashboard/images/CSU-Ram-Rev.png
 
         #QML_FILES Speedometer.qml
         #QML_FILES Dashboard.qml
 )
+
+target_include_directories(appQMLCDash PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Backend)
+
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
@@ -57,8 +67,18 @@ target_link_libraries(appQMLCDash
     PRIVATE Qt6::Quick Qt${QT_VERSION_MAJOR}::SerialBus
 )
 
+target_link_libraries(vescCanSim
+    PRIVATE Qt6::Core Qt${QT_VERSION_MAJOR}::SerialBus
+)
+
 include(GNUInstallDirs)
 install(TARGETS appQMLCDash
+    BUNDLE DESTINATION .
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+install(TARGETS vescCanSim
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

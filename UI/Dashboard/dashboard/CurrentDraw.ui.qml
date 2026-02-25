@@ -8,6 +8,7 @@ Check out https://doc.qt.io/qtcreator/creator-quick-ui-forms.html for details on
 */
 import QtQuick
 import QtQuick.Controls
+import QMLCDash
 
 Item {
     id: currentDraw
@@ -17,7 +18,7 @@ Item {
 
         Connections {
             target: dashboardController
-            onLeftCurrentChanged: {
+            function onCurrentChanged(current) {
                 currentDraw.level = current; // updated directly from MotorDataProcessor via DashboardController
             }
         }
