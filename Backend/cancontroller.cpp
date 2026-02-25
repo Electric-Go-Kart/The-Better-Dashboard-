@@ -3,7 +3,6 @@
 //for testing
 #include <QTimer>
 #include <QRandomGenerator>
-#include <iostream>
 
 CANController::CANController(QObject *parent)
     : QObject(parent)
@@ -47,9 +46,6 @@ CANController::CANController(QObject *parent)
 
 bool CANController::initialize(const QString &interfaceName)
 {
-    // Remove bitrate configuration explicitly FOR VCAN TEST ONLY
-    device->setConfigurationParameter(QCanBusDevice::BitRateKey, QVariant());
-
     device = QCanBus::instance()->createDevice("socketcan", interfaceName, nullptr);
 
     if (!device) {
@@ -73,7 +69,7 @@ void CANController::processIncomingFrame()
 {
     while (device->framesAvailable()) {
         QCanBusFrame frame = device->readFrame();
-        int id = frame.frameId() & 0xFF;
+        int id = frame.frameId();
         QByteArray data = frame.payload();
 
         if (id == LEFT_MOTOR_FRAME_ID) {
@@ -121,11 +117,11 @@ float CANController::decodeVoltage(const QByteArray &p)
 void CANController::generateFakeCanData()
 {
     // Fake Left Motor
-//    emit leftMotorRpmUpdated(QRandomGenerator::global()->bounded(0, 6000));
-//    emit leftMotorCurrentUpdated(QRandomGenerator::global()->bounded(0, 30) / 1.0f);
+    emit leftMotorRpmUpdated(QRandomGenerator::global()->bounded(0, 6000));
+    emit leftMotorCurrentUpdated(QRandomGenerator::global()->bounded(0, 30) / 1.0f);
     //emit leftVoltageReceived(QRandomGenerator::global()->bounded(40.0f, 60.0f));
     //emit leftPowerReceived(QRandomGenerator::global()->bounded(0.0f, 2000.0f));
-//    emit leftMotorSocUpdated(QRandomGenerator::global()->bounded(0, 100) / 1.0f);
+    emit leftMotorSocUpdated(QRandomGenerator::global()->bounded(0, 100) / 1.0f);
 
     // Fake Right Motor
     //emit rightRpmReceived(QRandomGenerator::global()->bounded(0, 6000));
@@ -133,21 +129,4 @@ void CANController::generateFakeCanData()
     //emit rightVoltageReceived(QRandomGenerator::global()->bounded(40.0f, 60.0f));
     //emit rightPowerReceived(QRandomGenerator::global()->bounded(0.0f, 2000.0f));
     //emit rightSocReceived(QRandomGenerator::global()->bounded(0.0f, 100.0f));
-    QCanBusDevice *device = QCanBus::instance()->createDevice("socketcan", "vcan0");
-
-    // Remove bitrate configuration explicitly
-    device->setConfigurationParameter(QCanBusDevice::BitRateKey, QVariant());
-
-    device->connectDevice();
-
-    //QCanBusFrame frame(0x123, QByteArray::fromHex("00 00 0B B8 00 69 01 F4"));
-    //device->writeFrame(frame);
-    //std::cout << "frame = 00 00 0B B8 00 69 01 F4";
-
-    QCanBusFrame frame(0x901,
-                       QByteArray::fromHex("00000BB8006901F4"));
-
-    frame.setExtendedFrameFormat(true);
-
-    device->writeFrame(frame);
 }

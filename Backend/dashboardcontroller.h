@@ -2,11 +2,9 @@
 #define DASHBOARDCONTROLLER_H
 
 #include <QObject>
-#include <QQmlEngine>
 
 class DashboardController : public QObject {
     Q_OBJECT
-    QML_ELEMENT
 
 public:
     explicit DashboardController(QObject *parent = nullptr);
