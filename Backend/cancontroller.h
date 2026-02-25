@@ -4,15 +4,17 @@
 #include <QObject>
 #include <QCanBus>
 #include <QCanBusDevice>
-#include <QtGlobal>
-#include "motordataprocessor.h"
+#include "MotorDataProcessor.h"
+#include <QQmlEngine>
 
 class CANController : public QObject {
     Q_OBJECT
+    QML_ELEMENT
 
 public:
     explicit CANController(QObject *parent = nullptr);
-    bool initialize(const QString &interfaceName = "can0");
+    bool initialize(const QString &interfaceName = "vcan0");
+    void start();
 
 signals:
     // Single motor values published to DashboardController
@@ -27,31 +29,21 @@ private slots:
 
 private:
     QCanBusDevice *device = nullptr;
+    QCanBusDevice *device2 = nullptr;
 
-    MotorDataProcessor motor;
+    // Two motors: left and right
+    MotorDataProcessor leftMotor;
+    MotorDataProcessor rightMotor;
 
-    // Defaults for a single FSESC motor setup.
-    int controllerId = 53;
-    const int LEGACY_SINGLE_FRAME_ID = 0x09;
-    const int VESC_STATUS_1_PACKET_ID = 9;
-    const int VESC_STATUS_2_PACKET_ID = 14;
-    const int VESC_STATUS_3_PACKET_ID = 15;
-    const int VESC_STATUS_4_PACKET_ID = 16;
-    const int VESC_BMS_SOC_PACKET_ID = 38;
+    // Example CAN IDs — replace with correct ones if needed
+    const int LEFT_MOTOR_FRAME_ID  = 0x901; //0x09;
+    const int RIGHT_MOTOR_FRAME_ID = 0x902; //0x0A;
 
-    bool processLegacyFrame(quint32 frameId, const QByteArray &payload);
-    bool processVescFrame(quint32 frameId, const QByteArray &payload);
-    static qint32 readS32BE(const QByteArray &payload, int offset);
-    static qint16 readS16BE(const QByteArray &payload, int offset);
+    float decodeCurrent(const QByteArray &payload);
+    int decodeRpm(const QByteArray &payload);
+    float decodeVoltage(const QByteArray &payload);
 
-    float deltaTime = 0.02f;
-    float lastVoltage = 0.0f;
-    float batteryCapacityAh = 0.0f;
-    bool hasExplicitSoc = false;
-    float vescAhDischarged = 0.0f;
-    float vescAhCharged = 0.0f;
-    float vescWhDischarged = 0.0f;
-    float vescWhCharged = 0.0f;
+    float deltaTime = 0.02f;   // 20ms update cycle
 };
 
 #endif 

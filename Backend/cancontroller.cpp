@@ -1,68 +1,93 @@
 #include "cancontroller.h"
 #include <QDebug>
-#include <QByteArray>
-#include <QCanBusFrame>
-#include <QProcessEnvironment>
-#include <QtMath>
+//for testing
+#include <QTimer>
+#include <QRandomGenerator>
+#include <iostream>
 
 CANController::CANController(QObject *parent)
     : QObject(parent)
 {
-    const QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    controllerId = env.value("DASH_VESC_CONTROLLER_ID", "53").toInt();
-    batteryCapacityAh = env.value("DASH_BATTERY_CAPACITY_AH", "20").toFloat();
 
-    connect(&motor, &MotorDataProcessor::rpmUpdated, this, &CANController::motorRpmUpdated);
-    connect(&motor, &MotorDataProcessor::currentUpdated, this, &CANController::motorCurrentUpdated);
-    connect(&motor, &MotorDataProcessor::voltageUpdated, this, &CANController::motorVoltageUpdated);
-    connect(&motor, &MotorDataProcessor::powerUpdated, this, &CANController::motorPowerUpdated);
-    connect(&motor, &MotorDataProcessor::socUpdated, this, [this](float soc) {
-        if (!hasExplicitSoc && batteryCapacityAh <= 0.0f) {
-            emit motorSocUpdated(soc);
-        }
-    });
+    // Connect Motor Processors to outgoing signals
+    connect(&leftMotor, &MotorDataProcessor::rpmUpdated,
+            this, &CANController::leftMotorRpmUpdated);
+
+    connect(&leftMotor, &MotorDataProcessor::currentUpdated,
+            this, &CANController::leftMotorCurrentUpdated);
+
+    connect(&leftMotor, &MotorDataProcessor::voltageUpdated,
+            this, &CANController::leftMotorVoltageUpdated);
+
+    connect(&leftMotor, &MotorDataProcessor::powerUpdated,
+            this, &CANController::leftMotorPowerUpdated);
+
+    connect(&leftMotor, &MotorDataProcessor::socUpdated,
+            this, &CANController::leftMotorSocUpdated);
+
+    connect(&rightMotor, &MotorDataProcessor::rpmUpdated,
+            this, &CANController::rightMotorRpmUpdated);
+
+    connect(&rightMotor, &MotorDataProcessor::currentUpdated,
+            this, &CANController::rightMotorCurrentUpdated);
+
+    connect(&rightMotor, &MotorDataProcessor::voltageUpdated,
+            this, &CANController::rightMotorVoltageUpdated);
+
+    connect(&rightMotor, &MotorDataProcessor::powerUpdated,
+            this, &CANController::rightMotorPowerUpdated);
+
+    connect(&rightMotor, &MotorDataProcessor::socUpdated,
+            this, &CANController::rightMotorSocUpdated);
 }
 
 bool CANController::initialize(const QString &interfaceName)
 {
-    if (device) {
-        return true;
-    }
-
+    qDebug() << "CAN initialize called";
     device = QCanBus::instance()->createDevice("socketcan", interfaceName, nullptr);
 
     if (!device) {
-        qWarning() << "Failed to create CAN device for interface" << interfaceName;
+        qWarning() << "Failed to create CAN device!";
+        qWarning() << device->errorString();
         return false;
     }
 
+    // Remove bitrate configuration explicitly FOR VCAN TEST ONLY
+    device->setConfigurationParameter(QCanBusDevice::ReceiveOwnKey, true);
+    device->setConfigurationParameter(QCanBusDevice::LoopbackKey, true);
+    device->setConfigurationParameter(QCanBusDevice::BitRateKey, QVariant());
+
+
+
     if (!device->connectDevice()) {
-        qWarning() << "Failed to connect to CAN interface" << interfaceName
-                   << ":" << device->errorString();
-        device->deleteLater();
-        device = nullptr;
+        qWarning() << "Failed to connect to CAN interface!";
+        qWarning() << device->errorString();
         return false;
     }
 
     connect(device, &QCanBusDevice::framesReceived,
             this, &CANController::processIncomingFrame);
 
-    qDebug() << "Connected to CAN interface:" << interfaceName
-             << "controllerId:" << controllerId
-             << "batteryCapacityAh:" << batteryCapacityAh;
+    qDebug() << "Signal connected to instance:" << this;
+
+    qDebug() << "Connected to CAN interface:" << interfaceName;
+
     return true;
 }
 
 void CANController::processIncomingFrame()
 {
-    if (!device) {
-        return;
-    }
-
+    qDebug() << "CAN processIncomingFrame called";
     while (device->framesAvailable()) {
-        const QCanBusFrame frame = device->readFrame();
-        const quint32 id = frame.frameId();
-        const QByteArray payload = frame.payload();
+        QCanBusFrame frame = device->readFrame();
+        int id = frame.frameId();
+        QByteArray data = frame.payload();
+
+
+        if (id == LEFT_MOTOR_FRAME_ID) {
+            int rpm = decodeRpm(data);
+            float current = decodeCurrent(data);
+            float voltage = decodeVoltage(data);
 
         if (processVescFrame(id, payload)) {
             continue;
@@ -161,9 +186,58 @@ qint32 CANController::readS32BE(const QByteArray &payload, int offset)
     return (b0 << 24) | (b1 << 16) | (b2 << 8) | b3;
 }
 
-qint16 CANController::readS16BE(const QByteArray &payload, int offset)
+void CANController::start()
 {
-    const qint16 hi = static_cast<quint8>(payload[offset]);
-    const qint16 lo = static_cast<quint8>(payload[offset + 1]);
-    return static_cast<qint16>((hi << 8) | lo);
+    // REMOVE after real CAN hardware is ready
+    QTimer *fakeTimer = new QTimer(this);
+    connect(fakeTimer, &QTimer::timeout, this, &CANController::generateFakeCanData);
+    fakeTimer->start(600); // update every 200ms
+}
+void CANController::generateFakeCanData()
+{
+    // Fake Left Motor
+//    emit leftMotorRpmUpdated(QRandomGenerator::global()->bounded(0, 6000));
+//    emit leftMotorCurrentUpdated(QRandomGenerator::global()->bounded(0, 30) / 1.0f);
+    //emit leftVoltageReceived(QRandomGenerator::global()->bounded(40.0f, 60.0f));
+    //emit leftPowerReceived(QRandomGenerator::global()->bounded(0.0f, 2000.0f));
+//    emit leftMotorSocUpdated(QRandomGenerator::global()->bounded(0, 100) / 1.0f);
+
+    // Fake Right Motor
+    //emit rightRpmReceived(QRandomGenerator::global()->bounded(0, 6000));
+    //emit rightCurrentReceived(QRandomGenerator::global()->bounded(0.0f, 30.0f));
+    //emit rightVoltageReceived(QRandomGenerator::global()->bounded(40.0f, 60.0f));
+    //emit rightPowerReceived(QRandomGenerator::global()->bounded(0.0f, 2000.0f));
+    //emit rightSocReceived(QRandomGenerator::global()->bounded(0.0f, 100.0f));
+
+
+    //QCanBusFrame frame(0x123, QByteArray::fromHex("00 00 0B B8 00 69 01 F4"));
+    //device->writeFrame(frame);
+    //std::cout << "frame = 00 00 0B B8 00 69 01 F4";
+
+    if (!device)
+        return;
+
+    if (device->state() != QCanBusDevice::ConnectedState)
+        return;
+
+    QCanBusFrame frame(
+        0x901,
+        QByteArray::fromHex("00000BB8006901F4")
+        );
+
+    frame.setExtendedFrameFormat(true);
+
+    //device->writeFrame(frame);
+    //qDebug() << "Fake frame sent";
+
+    qint64 result = device->writeFrame(frame);
+    qDebug() << "Bytes written:" << result;
+
+    // Optionally try to read back any frames immediately (loopback)
+    while (device->framesAvailable()) {
+        QCanBusFrame readBack = device->readFrame();
+        qDebug() << "Read back frame ID:" << readBack.frameId()
+                 << "Payload:" << readBack.payload().toHex();
+    }
+
 }
