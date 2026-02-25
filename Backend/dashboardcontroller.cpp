@@ -1,26 +1,51 @@
-#include "dashboardcontroller.h"
+#include "DashboardController.h"
 
 DashboardController::DashboardController(QObject *parent)
     : QObject(parent)
 {
 }
 
-void DashboardController::updateRpm(int rpm) {
-    emit rpmChanged(rpm);
+// LEFT MOTOR ------------------
+
+void DashboardController::updateLeftRpm(int rpm) {
+    emit leftRpmChanged(rpm);
 }
 
-void DashboardController::updateCurrent(float c) {
-    emit currentChanged(c);
+void DashboardController::updateLeftCurrent(float c) {
+    emit leftCurrentChanged(c);
 }
 
-void DashboardController::updateVoltage(float v) {
-    emit voltageChanged(v);
+void DashboardController::updateLeftVoltage(float v) {
+    emit leftVoltageChanged(v);
 }
 
-void DashboardController::updatePower(float p) {
-    emit powerChanged(p);
+void DashboardController::updateLeftPower(float p) {
+    emit leftPowerChanged(p);
 }
 
-void DashboardController::updateSoc(float soc) {
-    emit socChanged(soc);
+void DashboardController::updateLeftSoc(float soc) {
+    emit leftSocChanged(soc);
+}
+
+
+// RIGHT MOTOR ------------------
+
+void DashboardController::updateRightRpm(int rpm) {
+    emit rightRpmChanged(rpm);
+}
+
+void DashboardController::updateRightCurrent(float c) {
+    emit rightCurrentChanged(c);
+}
+
+void DashboardController::updateRightVoltage(float v) {
+    emit rightVoltageChanged(v);
+}
+
+void DashboardController::updateRightPower(float p) {
+    emit rightPowerChanged(p);
+}
+
+void DashboardController::updateRightSoc(float soc) {
+    emit rightSocChanged(soc);
 }

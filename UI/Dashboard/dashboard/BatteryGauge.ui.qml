@@ -19,7 +19,7 @@ Item {
 
         Connections {
             target: dashboardController
-            function onSocChanged(soc) {
+            onLeftSocChanged: {
                 batteryGauge.level = soc; // updated directly from MotorDataProcessor via DashboardController
             }
         }

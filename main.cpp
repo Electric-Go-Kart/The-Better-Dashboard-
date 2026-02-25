@@ -1,11 +1,9 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include <QProcessEnvironment>
-#include <QDebug>
 
-#include "Backend/dashboardcontroller.h"
-#include "Backend/cancontroller.h"
+#include "Backend/DashboardController.h"
+#include "Backend/CANController.h"
 
 int main(int argc, char *argv[])
 {
@@ -24,36 +22,50 @@ int main(int argc, char *argv[])
     canController.start();
 
     //---------------------------------------------------
-    // 2. Connect CAN -> DashboardController signals/slots
+    // 2. Connect CAN → DashboardController signals/slots
     //---------------------------------------------------
-    QObject::connect(&canController, &CANController::motorRpmUpdated,
-                     &dashboardController, &DashboardController::updateRpm);
-    QObject::connect(&canController, &CANController::motorSocUpdated,
-                     &dashboardController, &DashboardController::updateSoc);
-    QObject::connect(&canController, &CANController::motorCurrentUpdated,
-                     &dashboardController, &DashboardController::updateCurrent);
-    QObject::connect(&canController, &CANController::motorVoltageUpdated,
-                     &dashboardController, &DashboardController::updateVoltage);
-    QObject::connect(&canController, &CANController::motorPowerUpdated,
-                     &dashboardController, &DashboardController::updatePower);
+    //LEFT MOTOR
+    QObject::connect(&canController, &CANController::leftMotorRpmUpdated,
+                     &dashboardController, &DashboardController::updateLeftRpm);
+
+    QObject::connect(&canController, &CANController::leftMotorSocUpdated,
+                     &dashboardController, &DashboardController::updateLeftSoc);
+
+    QObject::connect(&canController, &CANController::leftMotorCurrentUpdated,
+                     &dashboardController, &DashboardController::updateLeftCurrent);
+
+    QObject::connect(&canController, &CANController::leftMotorVoltageUpdated,
+                     &dashboardController, &DashboardController::updateLeftVoltage);
+
+    QObject::connect(&canController, &CANController::leftMotorPowerUpdated,
+                     &dashboardController, &DashboardController::updateLeftPower);
+
+
+    //RIGHT MOTOR
+    QObject::connect(&canController, &CANController::rightMotorRpmUpdated,
+                     &dashboardController, &DashboardController::updateRightRpm);
+
+    QObject::connect(&canController, &CANController::rightMotorSocUpdated,
+                     &dashboardController, &DashboardController::updateRightSoc);
+
+    QObject::connect(&canController, &CANController::rightMotorCurrentUpdated,
+                     &dashboardController, &DashboardController::updateRightCurrent);
+
+    QObject::connect(&canController, &CANController::rightMotorVoltageUpdated,
+                     &dashboardController, &DashboardController::updateRightVoltage);
+
+    QObject::connect(&canController, &CANController::rightMotorPowerUpdated,
+                     &dashboardController, &DashboardController::updateRightPower);
+
+    // (Add others if you want current/voltage/power)
 
     //---------------------------------------------------
-    // 3. Initialize CAN for Pi OS / Boot2Qt
-    //---------------------------------------------------
-    const QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    const QString canInterface = env.value("DASH_CAN_IFACE", "can0");
-
-    if (!canController.initialize(canInterface)) {
-        qWarning() << "CAN init failed on interface" << canInterface;
-    }
-
-    //---------------------------------------------------
-    // 4. Expose dashboardController to QML
+    // 3. Expose dashboardController to QML
     //---------------------------------------------------
     engine.rootContext()->setContextProperty("dashboardController", &dashboardController);
 
     //---------------------------------------------------
-    // 5. Load QML
+    // 4. Load QML
     //---------------------------------------------------
     QObject::connect(
         &engine,

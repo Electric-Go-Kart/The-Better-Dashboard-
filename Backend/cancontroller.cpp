@@ -1,4 +1,4 @@
-#include "cancontroller.h"
+#include "CANController.h"
 #include <QDebug>
 //for testing
 #include <QTimer>
@@ -89,101 +89,41 @@ void CANController::processIncomingFrame()
             float current = decodeCurrent(data);
             float voltage = decodeVoltage(data);
 
-        if (processVescFrame(id, payload)) {
-            continue;
+            leftMotor.updateValues(rpm, voltage, current, deltaTime);
         }
 
-        processLegacyFrame(id, payload);
-    }
-}
+        else if (id == RIGHT_MOTOR_FRAME_ID) {
+            int rpm = decodeRpm(data);
+            float current = decodeCurrent(data);
+            float voltage = decodeVoltage(data);
 
-bool CANController::processLegacyFrame(quint32 frameId, const QByteArray &payload)
-{
-    if (frameId != static_cast<quint32>(LEGACY_SINGLE_FRAME_ID) || payload.size() < 8) {
-        return false;
-    }
-
-    const int rpm = readS32BE(payload, 0);
-    const float current = static_cast<float>(readS16BE(payload, 4)) / 10.0f;
-    const float voltage = static_cast<float>(readS16BE(payload, 6)) / 10.0f;
-    lastVoltage = voltage;
-
-    motor.updateValues(rpm, voltage, current, deltaTime);
-    return true;
-}
-
-bool CANController::processVescFrame(quint32 frameId, const QByteArray &payload)
-{
-    const int packetId = static_cast<int>((frameId >> 8U) & 0xFFU);
-    const int sourceId = static_cast<int>(frameId & 0xFFU);
-
-    if (sourceId != controllerId) {
-        return false;
-    }
-
-    if (packetId == VESC_STATUS_1_PACKET_ID && payload.size() >= 8) {
-        const int rpm = readS32BE(payload, 0);
-        const float motorCurrent = static_cast<float>(readS16BE(payload, 4)) / 10.0f;
-        const float dutyCycle = static_cast<float>(readS16BE(payload, 6)) / 1000.0f;
-        Q_UNUSED(dutyCycle);
-
-        const float currentForModel = qFabs(motorCurrent);
-        motor.updateValues(rpm, lastVoltage, currentForModel, deltaTime);
-        emit motorCurrentUpdated(motorCurrent);
-        return true;
-    }
-
-    if (packetId == VESC_STATUS_2_PACKET_ID && payload.size() >= 8) {
-        vescAhDischarged = static_cast<float>(readS32BE(payload, 0)) / 10000.0f;
-        vescAhCharged = static_cast<float>(readS32BE(payload, 4)) / 10000.0f;
-
-        if (batteryCapacityAh > 0.0f) {
-            const float netAh = vescAhDischarged - vescAhCharged;
-            const float soc = qBound(0.0f, 100.0f * (1.0f - (netAh / batteryCapacityAh)), 100.0f);
-            emit motorSocUpdated(soc);
+            rightMotor.updateValues(rpm, voltage, current, deltaTime);
         }
-        return true;
     }
-
-    if (packetId == VESC_STATUS_3_PACKET_ID && payload.size() >= 8) {
-        vescWhDischarged = static_cast<float>(readS32BE(payload, 0)) / 10000.0f;
-        vescWhCharged = static_cast<float>(readS32BE(payload, 4)) / 10000.0f;
-        return true;
-    }
-
-    if (packetId == VESC_STATUS_4_PACKET_ID && payload.size() >= 8) {
-        const float inputCurrent = static_cast<float>(readS16BE(payload, 4)) / 10.0f;
-        emit motorCurrentUpdated(inputCurrent);
-        return true;
-    }
-
-    if (packetId == VESC_BMS_SOC_PACKET_ID && payload.size() >= 1) {
-        hasExplicitSoc = true;
-        const float soc = qBound(0.0f, static_cast<float>(static_cast<quint8>(payload[0])), 100.0f);
-        emit motorSocUpdated(soc);
-        return true;
-    }
-
-    // Optional compatibility mode for older payload layouts
-    if (packetId == LEGACY_SINGLE_FRAME_ID && payload.size() >= 8) {
-        const int rpm = readS32BE(payload, 0);
-        const float current = static_cast<float>(readS16BE(payload, 4)) / 10.0f;
-        const float voltage = static_cast<float>(readS16BE(payload, 6)) / 10.0f;
-        lastVoltage = voltage;
-        motor.updateValues(rpm, lastVoltage, current, deltaTime);
-        return true;
-    }
-
-    return false;
 }
 
-qint32 CANController::readS32BE(const QByteArray &payload, int offset)
+// ---------------- DECODING FUNCTIONS ------------------
+
+int CANController::decodeRpm(const QByteArray &p)
 {
-    const qint32 b0 = static_cast<quint8>(payload[offset]);
-    const qint32 b1 = static_cast<quint8>(payload[offset + 1]);
-    const qint32 b2 = static_cast<quint8>(payload[offset + 2]);
-    const qint32 b3 = static_cast<quint8>(payload[offset + 3]);
-    return (b0 << 24) | (b1 << 16) | (b2 << 8) | b3;
+    // Bytes 0–3 : Big-endian RPM
+    int raw = (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | (p[3]);
+    return raw; // already scaled
+}
+
+float CANController::decodeCurrent(const QByteArray &p)
+{
+    // Bytes 4–5 : int16 / 10
+    short raw = (p[4] << 8) | (p[5]);
+    return raw / 10.0f;
+}
+
+float CANController::decodeVoltage(const QByteArray &p)
+{
+    // Example only — adjust depending on your real VESC protocol
+    // Bytes 6–7 : voltage * 10
+    short raw = (p[6] << 8) | (p[7]);
+    return raw / 10.0f;
 }
 
 void CANController::start()

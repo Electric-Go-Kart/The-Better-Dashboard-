@@ -1,4 +1,4 @@
-#include "motordataprocessor.h"
+#include "MotorDataProcessor.h"
 #include <algorithm>
 
 MotorDataProcessor::MotorDataProcessor(QObject *parent)
@@ -29,6 +29,7 @@ void MotorDataProcessor::updateValues(int rpmRaw, float voltageRaw, float curren
 
     // Integrate into total energy (Wh)
     integrateEnergy(instantPower, deltaTimeSec);
+    emit powerUpdated(instantPower);
 
     // Update SOC
     stateOfCharge = computeSOC();
