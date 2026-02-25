@@ -7,7 +7,6 @@
 
 int main(int argc, char *argv[])
 {
-    qDebug() << "MAIN STARTED";
     qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
 
     QGuiApplication app(argc, argv);
@@ -18,8 +17,6 @@ int main(int argc, char *argv[])
     //---------------------------------------------------
     DashboardController dashboardController;
     CANController canController;
-    canController.initialize("vcan0");
-    canController.start();
 
     //---------------------------------------------------
     // 2. Connect CAN → DashboardController signals/slots
@@ -75,8 +72,6 @@ int main(int argc, char *argv[])
         Qt::QueuedConnection);
 
     engine.loadFromModule("QMLCDash", "Main");
-
-    qDebug() << "Main CANController instance:" << &canController;
 
     return app.exec();
 }
