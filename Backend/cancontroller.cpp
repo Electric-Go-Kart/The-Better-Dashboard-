@@ -3,16 +3,11 @@
 //for testing
 #include <QTimer>
 #include <QRandomGenerator>
+#include <iostream>
 
 CANController::CANController(QObject *parent)
     : QObject(parent)
 {
-    // REMOVE after real CAN hardware is ready
-    /*
-    QTimer *fakeTimer = new QTimer(this);
-    connect(fakeTimer, &QTimer::timeout, this, &CANController::generateFakeCanData);
-    fakeTimer->start(600); // update every 200ms
-    */
 
     // Connect Motor Processors to outgoing signals
     connect(&leftMotor, &MotorDataProcessor::rpmUpdated,
@@ -48,31 +43,46 @@ CANController::CANController(QObject *parent)
 
 bool CANController::initialize(const QString &interfaceName)
 {
+    qDebug() << "CAN initialize called";
     device = QCanBus::instance()->createDevice("socketcan", interfaceName, nullptr);
 
     if (!device) {
         qWarning() << "Failed to create CAN device!";
+        qWarning() << device->errorString();
         return false;
     }
 
+    // Remove bitrate configuration explicitly FOR VCAN TEST ONLY
+    device->setConfigurationParameter(QCanBusDevice::ReceiveOwnKey, true);
+    device->setConfigurationParameter(QCanBusDevice::LoopbackKey, true);
+    device->setConfigurationParameter(QCanBusDevice::BitRateKey, QVariant());
+
+
+
     if (!device->connectDevice()) {
         qWarning() << "Failed to connect to CAN interface!";
+        qWarning() << device->errorString();
         return false;
     }
 
     connect(device, &QCanBusDevice::framesReceived,
             this, &CANController::processIncomingFrame);
 
+    qDebug() << "Signal connected to instance:" << this;
+
     qDebug() << "Connected to CAN interface:" << interfaceName;
+
     return true;
 }
 
 void CANController::processIncomingFrame()
 {
+    qDebug() << "CAN processIncomingFrame called";
     while (device->framesAvailable()) {
         QCanBusFrame frame = device->readFrame();
         int id = frame.frameId();
         QByteArray data = frame.payload();
+
 
         if (id == LEFT_MOTOR_FRAME_ID) {
             int rpm = decodeRpm(data);
@@ -116,15 +126,21 @@ float CANController::decodeVoltage(const QByteArray &p)
     return raw / 10.0f;
 }
 
-/*
+void CANController::start()
+{
+    // REMOVE after real CAN hardware is ready
+    QTimer *fakeTimer = new QTimer(this);
+    connect(fakeTimer, &QTimer::timeout, this, &CANController::generateFakeCanData);
+    fakeTimer->start(600); // update every 200ms
+}
 void CANController::generateFakeCanData()
 {
     // Fake Left Motor
-    emit leftMotorRpmUpdated(QRandomGenerator::global()->bounded(0, 6000));
-    emit leftMotorCurrentUpdated(QRandomGenerator::global()->bounded(0, 30) / 1.0f);
+//    emit leftMotorRpmUpdated(QRandomGenerator::global()->bounded(0, 6000));
+//    emit leftMotorCurrentUpdated(QRandomGenerator::global()->bounded(0, 30) / 1.0f);
     //emit leftVoltageReceived(QRandomGenerator::global()->bounded(40.0f, 60.0f));
     //emit leftPowerReceived(QRandomGenerator::global()->bounded(0.0f, 2000.0f));
-    emit leftMotorSocUpdated(QRandomGenerator::global()->bounded(0, 100) / 1.0f);
+//    emit leftMotorSocUpdated(QRandomGenerator::global()->bounded(0, 100) / 1.0f);
 
     // Fake Right Motor
     //emit rightRpmReceived(QRandomGenerator::global()->bounded(0, 6000));
@@ -132,5 +148,36 @@ void CANController::generateFakeCanData()
     //emit rightVoltageReceived(QRandomGenerator::global()->bounded(40.0f, 60.0f));
     //emit rightPowerReceived(QRandomGenerator::global()->bounded(0.0f, 2000.0f));
     //emit rightSocReceived(QRandomGenerator::global()->bounded(0.0f, 100.0f));
+
+
+    //QCanBusFrame frame(0x123, QByteArray::fromHex("00 00 0B B8 00 69 01 F4"));
+    //device->writeFrame(frame);
+    //std::cout << "frame = 00 00 0B B8 00 69 01 F4";
+
+    if (!device)
+        return;
+
+    if (device->state() != QCanBusDevice::ConnectedState)
+        return;
+
+    QCanBusFrame frame(
+        0x901,
+        QByteArray::fromHex("00000BB8006901F4")
+        );
+
+    frame.setExtendedFrameFormat(true);
+
+    //device->writeFrame(frame);
+    //qDebug() << "Fake frame sent";
+
+    qint64 result = device->writeFrame(frame);
+    qDebug() << "Bytes written:" << result;
+
+    // Optionally try to read back any frames immediately (loopback)
+    while (device->framesAvailable()) {
+        QCanBusFrame readBack = device->readFrame();
+        qDebug() << "Read back frame ID:" << readBack.frameId()
+                 << "Payload:" << readBack.payload().toHex();
+    }
+
 }
-*/

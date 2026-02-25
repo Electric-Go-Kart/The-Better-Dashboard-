@@ -2,11 +2,12 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
-#include "Backend/CANController.h"
 #include "Backend/DashboardController.h"
+#include "Backend/CANController.h"
 
 int main(int argc, char *argv[])
 {
+    qDebug() << "MAIN STARTED";
     qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
 
     QGuiApplication app(argc, argv);
@@ -17,61 +18,44 @@ int main(int argc, char *argv[])
     //---------------------------------------------------
     DashboardController dashboardController;
     CANController canController;
+    canController.initialize("vcan0");
+    canController.start();
 
     //---------------------------------------------------
     // 2. Connect CAN → DashboardController signals/slots
     //---------------------------------------------------
     //LEFT MOTOR
-    QObject::connect(&canController,
-                     &CANController::leftMotorRpmUpdated,
-                     &dashboardController,
-                     &DashboardController::updateLeftRpm);
+    QObject::connect(&canController, &CANController::leftMotorRpmUpdated,
+                     &dashboardController, &DashboardController::updateLeftRpm);
 
-    QObject::connect(&canController,
-                     &CANController::leftMotorSocUpdated,
-                     &dashboardController,
-                     &DashboardController::updateLeftSoc);
+    QObject::connect(&canController, &CANController::leftMotorSocUpdated,
+                     &dashboardController, &DashboardController::updateLeftSoc);
 
-    QObject::connect(&canController,
-                     &CANController::leftMotorCurrentUpdated,
-                     &dashboardController,
-                     &DashboardController::updateLeftCurrent);
+    QObject::connect(&canController, &CANController::leftMotorCurrentUpdated,
+                     &dashboardController, &DashboardController::updateLeftCurrent);
 
-    QObject::connect(&canController,
-                     &CANController::leftMotorVoltageUpdated,
-                     &dashboardController,
-                     &DashboardController::updateLeftVoltage);
+    QObject::connect(&canController, &CANController::leftMotorVoltageUpdated,
+                     &dashboardController, &DashboardController::updateLeftVoltage);
 
-    QObject::connect(&canController,
-                     &CANController::leftMotorPowerUpdated,
-                     &dashboardController,
-                     &DashboardController::updateLeftPower);
+    QObject::connect(&canController, &CANController::leftMotorPowerUpdated,
+                     &dashboardController, &DashboardController::updateLeftPower);
+
 
     //RIGHT MOTOR
-    QObject::connect(&canController,
-                     &CANController::rightMotorRpmUpdated,
-                     &dashboardController,
-                     &DashboardController::updateRightRpm);
+    QObject::connect(&canController, &CANController::rightMotorRpmUpdated,
+                     &dashboardController, &DashboardController::updateRightRpm);
 
-    QObject::connect(&canController,
-                     &CANController::rightMotorSocUpdated,
-                     &dashboardController,
-                     &DashboardController::updateRightSoc);
+    QObject::connect(&canController, &CANController::rightMotorSocUpdated,
+                     &dashboardController, &DashboardController::updateRightSoc);
 
-    QObject::connect(&canController,
-                     &CANController::rightMotorCurrentUpdated,
-                     &dashboardController,
-                     &DashboardController::updateRightCurrent);
+    QObject::connect(&canController, &CANController::rightMotorCurrentUpdated,
+                     &dashboardController, &DashboardController::updateRightCurrent);
 
-    QObject::connect(&canController,
-                     &CANController::rightMotorVoltageUpdated,
-                     &dashboardController,
-                     &DashboardController::updateRightVoltage);
+    QObject::connect(&canController, &CANController::rightMotorVoltageUpdated,
+                     &dashboardController, &DashboardController::updateRightVoltage);
 
-    QObject::connect(&canController,
-                     &CANController::rightMotorPowerUpdated,
-                     &dashboardController,
-                     &DashboardController::updateRightPower);
+    QObject::connect(&canController, &CANController::rightMotorPowerUpdated,
+                     &dashboardController, &DashboardController::updateRightPower);
 
     // (Add others if you want current/voltage/power)
 
@@ -92,8 +76,12 @@ int main(int argc, char *argv[])
 
     engine.loadFromModule("QMLCDash", "Main");
 
+    qDebug() << "Main CANController instance:" << &canController;
+
     return app.exec();
 }
+
+
 
 /*
 #include <QGuiApplication>

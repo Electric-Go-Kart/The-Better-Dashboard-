@@ -8,11 +8,12 @@ Check out https://doc.qt.io/qtcreator/creator-quick-ui-forms.html for details on
 */
 import QtQuick
 import QtQuick.Controls
+import QMLCDash
 
 Item {
     id: root
-    width: Screen.width //800
-    height: Screen.height //480
+    width: 800
+    height: 480
 
     Speedometer {
         id: speedometer
