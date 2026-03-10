@@ -62,7 +62,7 @@ Item {
 
         Text {
             anchors.centerIn: parent
-            text: currentDraw.level + "A"
+            text: (currentDraw.level).toFixed(2) + "A"
             color: "white"
             font.pixelSize: 20
             rotation: 90

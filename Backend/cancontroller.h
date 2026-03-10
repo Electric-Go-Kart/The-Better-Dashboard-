@@ -13,8 +13,8 @@ class CANController : public QObject {
 
 public:
     explicit CANController(QObject *parent = nullptr);
-    bool initialize(const QString &interfaceName = "vcan0");
-    void start();
+    bool initialize(const QString &interfaceName = "can0"); //vcan0 for testing
+    //void start();
 
 signals:
     // Pass values to DashboardController
@@ -33,7 +33,7 @@ signals:
 private slots:
     void processIncomingFrame();
     //for testing
-    void generateFakeCanData();
+    //void generateFakeCanData();
 
 private:
     QCanBusDevice *device = nullptr;
@@ -44,7 +44,7 @@ private:
     MotorDataProcessor rightMotor;
 
     // Example CAN IDs — replace with correct ones if needed
-    const int LEFT_MOTOR_FRAME_ID  = 0x901; //0x09;
+    const int LEFT_MOTOR_FRAME_ID  = 0x935; //0x09;
     const int RIGHT_MOTOR_FRAME_ID = 0x902; //0x0A;
 
     float decodeCurrent(const QByteArray &payload);

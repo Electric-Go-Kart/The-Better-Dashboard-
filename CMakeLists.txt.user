@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 17.0.2, 2026-02-25T15:26:00. -->
+<!-- Written by QtCreator 17.0.2, 2026-03-04T18:19:19. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -8,7 +8,7 @@
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
-  <value type="qlonglong">1</value>
+  <value type="qlonglong">0</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.EditorSettings</variable>
@@ -104,22 +104,22 @@
     <value type="int" key="CMake.Configure.BaseEnvironment">2</value>
     <value type="bool" key="CMake.Configure.ClearSystemEnvironment">false</value>
     <valuelist type="QVariantList" key="CMake.Configure.UserEnvironmentChanges"/>
-    <value type="QString" key="CMake.Initial.Parameters">-DCMAKE_PREFIX_PATH:STRING=%{Qt:QT_INSTALL_PREFIX}
--DCMAKE_CXX_FLAGS_INIT:STRING=%{Qt:QML_DEBUG_FLAG}
+    <value type="QString" key="CMake.Initial.Parameters">-DCMAKE_TOOLCHAIN_FILE:FILEPATH=C:/Qt/6.10.0/Boot2Qt/raspberrypi-armv8/toolchain/sysroots/x86_64-w64-mingw32/usr/lib/cmake/Qt6/qt.toolchain.cmake
+-DQT_MAINTENANCE_TOOL:FILEPATH=C:/Qt/MaintenanceTool.exe
+-DCMAKE_COLOR_DIAGNOSTICS:BOOL=ON
 -DCMAKE_GENERATOR:STRING=Ninja
--DCMAKE_CXX_COMPILER:STRING=%{Compiler:Executable:Cxx}
 -DCMAKE_BUILD_TYPE:STRING=Debug
+-DCMAKE_CXX_COMPILER_TARGET:STRING=aarch64-poky-linux
+-DCMAKE_CXX_FLAGS_INIT:STRING=%{Qt:QML_DEBUG_FLAG}
 -DCMAKE_C_COMPILER:STRING=%{Compiler:Executable:C}
 -DQT_QMAKE_EXECUTABLE:STRING=%{Qt:qmakeExecutable}
--DCMAKE_PROJECT_INCLUDE_BEFORE:FILEPATH=%{BuildConfig:BuildDirectory:NativeFilePath}/.qtc/package-manager/auto-setup.cmake
--DCMAKE_TOOLCHAIN_FILE:FILEPATH=C:/Qt/6.10.0/Boot2Qt/raspberrypi-armv8/toolchain/sysroots/x86_64-w64-mingw32/usr/lib/cmake/Qt6/qt.toolchain.cmake
--DCMAKE_CXX_COMPILER_TARGET:STRING=aarch64-poky-linux
+-DCMAKE_CXX_COMPILER:STRING=%{Compiler:Executable:Cxx}
 -DCMAKE_SYSROOT:PATH=C:/Qt/6.10.0/Boot2Qt/raspberrypi-armv8/toolchain/sysroots/cortexa53-poky-linux
--DQT_MAINTENANCE_TOOL:FILEPATH=C:/Qt/MaintenanceTool.exe
+-DCMAKE_PREFIX_PATH:STRING=%{Qt:QT_INSTALL_PREFIX}
 -DCMAKE_C_COMPILER_TARGET:STRING=aarch64-poky-linux
--DCMAKE_COLOR_DIAGNOSTICS:BOOL=ON
--DCMAKE_MAKE_PROGRAM:FILEPATH=C:/Qt/6.10.0/Boot2Qt/raspberrypi-armv8/toolchain/sysroots/x86_64-w64-mingw32/usr/bin/ninja.exe</value>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">C:\Users\nickd\Desktop\CURRENT WORKING VERSION\The-Better-Dashboard-\build\6.10.0-raspberrypi-armv8-Debug</value>
+-DCMAKE_MAKE_PROGRAM:FILEPATH=C:/Qt/6.10.0/Boot2Qt/raspberrypi-armv8/toolchain/sysroots/x86_64-w64-mingw32/usr/bin/ninja.exe
+-DCMAKE_PROJECT_INCLUDE_BEFORE:FILEPATH=%{BuildConfig:BuildDirectory:NativeFilePath}/.qtc/package-manager/auto-setup.cmake</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">C:\Users\nickd\Desktop\CURRENT_WORKING_VERSION\feb25\The-Better-Dashboard-\build\6.10.0-raspberrypi-armv8-Debug</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="QString" key="CMakeProjectManager.MakeStep.BuildPreset"></value>
@@ -178,12 +178,24 @@
       <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
        <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
        <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">RemoteLinux.DirectUploadStep</value>
-       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedFiles"/>
-       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedHosts"/>
-       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedRemotePaths"/>
-       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedSysroots"/>
-       <valuelist type="QVariantList" key="RemoteLinux.LastDeployedLocalTimes"/>
-       <valuelist type="QVariantList" key="RemoteLinux.LastDeployedRemoteTimes"/>
+       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedFiles">
+        <value type="QString">C:/Users/nickd/AppData/Local/Temp/QtCreator-MwuaUF/staging-f31cb6ec9c5e3960/usr/bin/appQMLCDash</value>
+       </valuelist>
+       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedHosts">
+        <value type="QString">169.254.26.2</value>
+       </valuelist>
+       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedRemotePaths">
+        <value type="QString">/usr/bin</value>
+       </valuelist>
+       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedSysroots">
+        <value type="QString">C:/Qt/6.10.0/Boot2Qt/raspberrypi-armv8/toolchain/sysroots/cortexa53-poky-linux</value>
+       </valuelist>
+       <valuelist type="QVariantList" key="RemoteLinux.LastDeployedLocalTimes">
+        <value type="QDateTime">2026-03-04T17:54:54.286</value>
+       </valuelist>
+       <valuelist type="QVariantList" key="RemoteLinux.LastDeployedRemoteTimes">
+        <value type="QDateTime">2026-02-18T20:39:50.000</value>
+       </valuelist>
       </valuemap>
       <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">2</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Deploy</value>
@@ -241,14 +253,17 @@
      <value type="int" key="Analyzer.Valgrind.Callgrind.CostFormat">0</value>
      <value type="bool" key="Analyzer.Valgrind.Settings.UseGlobalSettings">true</value>
      <valuelist type="QVariantList" key="CustomOutputParsers"/>
-     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
+     <value type="int" key="PE.EnvironmentAspect.Base">1</value>
      <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
      <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
      <value type="QString" key="PerfRecordArgsId">-e cpu-cycles --call-graph &quot;dwarf,4096&quot; -F 250</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.CustomExecutableRunConfiguration</value>
-     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey"></value>
-     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">false</value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">appQMLCDash</value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">QdbLinuxRunConfiguration:</value>
+     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">appQMLCDash</value>
+     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">true</value>
+     <value type="QString" key="QdbRunConfig.LocalExecutable">C:\Users\nickd\Desktop\CURRENT_WORKING_VERSION\feb25\The-Better-Dashboard-\build\6.10.0-raspberrypi-armv8-Debug\appQMLCDash</value>
+     <value type="QString" key="QdbRunConfig.RemoteExecutable">ssh://root@169.254.26.2/usr/bin/appQMLCDash</value>
+     <value type="int" key="RemoteLinux.EnvironmentAspect.Version">1</value>
      <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
      <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
     </valuemap>
@@ -270,12 +285,24 @@
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">RemoteLinux.DirectUploadStep</value>
-      <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedFiles"/>
-      <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedHosts"/>
-      <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedRemotePaths"/>
-      <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedSysroots"/>
-      <valuelist type="QVariantList" key="RemoteLinux.LastDeployedLocalTimes"/>
-      <valuelist type="QVariantList" key="RemoteLinux.LastDeployedRemoteTimes"/>
+      <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedFiles">
+       <value type="QString">C:/Users/nickd/AppData/Local/Temp/QtCreator-MwuaUF/staging-f31cb6ec9c5e3960/usr/bin/appQMLCDash</value>
+      </valuelist>
+      <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedHosts">
+       <value type="QString">169.254.26.2</value>
+      </valuelist>
+      <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedRemotePaths">
+       <value type="QString">/usr/bin</value>
+      </valuelist>
+      <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedSysroots">
+       <value type="QString">C:/Qt/6.10.0/Boot2Qt/raspberrypi-armv8/toolchain/sysroots/cortexa53-poky-linux</value>
+      </valuelist>
+      <valuelist type="QVariantList" key="RemoteLinux.LastDeployedLocalTimes">
+       <value type="QDateTime">2026-03-04T17:54:54.286</value>
+      </valuelist>
+      <valuelist type="QVariantList" key="RemoteLinux.LastDeployedRemoteTimes">
+       <value type="QDateTime">2026-02-18T20:39:50.000</value>
+      </valuelist>
      </valuemap>
      <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">2</value>
      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Deploy</value>
@@ -333,14 +360,17 @@
     <value type="int" key="Analyzer.Valgrind.Callgrind.CostFormat">0</value>
     <value type="bool" key="Analyzer.Valgrind.Settings.UseGlobalSettings">true</value>
     <valuelist type="QVariantList" key="CustomOutputParsers"/>
-    <value type="int" key="PE.EnvironmentAspect.Base">2</value>
+    <value type="int" key="PE.EnvironmentAspect.Base">1</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
     <value type="QString" key="PerfRecordArgsId">-e cpu-cycles --call-graph &quot;dwarf,4096&quot; -F 250</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.CustomExecutableRunConfiguration</value>
-    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey"></value>
-    <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">false</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">appQMLCDash</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">QdbLinuxRunConfiguration:</value>
+    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">appQMLCDash</value>
+    <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">true</value>
+    <value type="QString" key="QdbRunConfig.LocalExecutable">C:\Users\nickd\Desktop\CURRENT_WORKING_VERSION\feb25\The-Better-Dashboard-\build\6.10.0-raspberrypi-armv8-Debug\appQMLCDash</value>
+    <value type="QString" key="QdbRunConfig.RemoteExecutable">ssh://root@169.254.26.2/usr/bin/appQMLCDash</value>
+    <value type="int" key="RemoteLinux.EnvironmentAspect.Version">1</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
    </valuemap>
@@ -363,18 +393,18 @@
     <value type="int" key="CMake.Configure.BaseEnvironment">2</value>
     <value type="bool" key="CMake.Configure.ClearSystemEnvironment">false</value>
     <valuelist type="QVariantList" key="CMake.Configure.UserEnvironmentChanges"/>
-    <value type="QString" key="CMake.Initial.Parameters">-DCMAKE_PREFIX_PATH:PATH=%{Qt:QT_INSTALL_PREFIX}
--DCMAKE_CXX_FLAGS_INIT:STRING=%{Qt:QML_DEBUG_FLAG}
+    <value type="QString" key="CMake.Initial.Parameters">-DQT_MAINTENANCE_TOOL:FILEPATH=C:/Qt/MaintenanceTool.exe
+-DCMAKE_COLOR_DIAGNOSTICS:BOOL=ON
 -DCMAKE_GENERATOR:STRING=Ninja
--DCMAKE_CXX_COMPILER:FILEPATH=%{Compiler:Executable:Cxx}
 -DCMAKE_BUILD_TYPE:STRING=Debug
+-DCMAKE_CXX_FLAGS_INIT:STRING=%{Qt:QML_DEBUG_FLAG}
 -DCMAKE_C_COMPILER:FILEPATH=%{Compiler:Executable:C}
 -DQT_QMAKE_EXECUTABLE:FILEPATH=%{Qt:qmakeExecutable}
--DCMAKE_PROJECT_INCLUDE_BEFORE:FILEPATH=%{BuildConfig:BuildDirectory:NativeFilePath}/.qtc/package-manager/auto-setup.cmake
--DQT_MAINTENANCE_TOOL:FILEPATH=C:/Qt/MaintenanceTool.exe
--DCMAKE_COLOR_DIAGNOSTICS:BOOL=ON</value>
+-DCMAKE_CXX_COMPILER:FILEPATH=%{Compiler:Executable:Cxx}
+-DCMAKE_PREFIX_PATH:PATH=%{Qt:QT_INSTALL_PREFIX}
+-DCMAKE_PROJECT_INCLUDE_BEFORE:FILEPATH=%{BuildConfig:BuildDirectory:NativeFilePath}/.qtc/package-manager/auto-setup.cmake</value>
     <value type="int" key="EnableQmlDebugging">0</value>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">C:\Users\nickd\Desktop\CURRENT WORKING VERSION\The-Better-Dashboard-\build\Desktop_Qt_6_9_3_MinGW_64_bit-Debug</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">C:\Users\nickd\Desktop\CURRENT_WORKING_VERSION\feb25\The-Better-Dashboard-\build\Desktop_Qt_6_9_3_MinGW_64_bit-Debug</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="QString" key="CMakeProjectManager.MakeStep.BuildPreset"></value>
@@ -384,7 +414,6 @@
       <value type="bool" key="CMakeProjectManager.MakeStep.ClearSystemEnvironment">false</value>
       <valuelist type="QVariantList" key="CMakeProjectManager.MakeStep.UserEnvironmentChanges"/>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Build</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.MakeStep</value>
      </valuemap>
      <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">1</value>
@@ -401,7 +430,6 @@
       <value type="bool" key="CMakeProjectManager.MakeStep.ClearSystemEnvironment">false</value>
       <valuelist type="QVariantList" key="CMakeProjectManager.MakeStep.UserEnvironmentChanges"/>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Build</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.MakeStep</value>
      </valuemap>
      <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">1</value>
@@ -475,14 +503,12 @@
      <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
      <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
      <value type="QString" key="PerfRecordArgsId">-e cpu-cycles --call-graph &quot;dwarf,4096&quot; -F 250</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">appQMLCDash</value>
-     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeRunConfiguration.</value>
-     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">appQMLCDash</value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.CustomExecutableRunConfiguration</value>
+     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey"></value>
      <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">false</value>
      <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
-     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
      <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-     <value type="QString" key="RunConfiguration.WorkingDirectory.default">C:/Users/nickd/Desktop/CURRENT WORKING VERSION/The-Better-Dashboard-/build/Desktop_Qt_6_9_3_MinGW_64_bit-Debug</value>
     </valuemap>
     <value type="qlonglong" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
    </valuemap>
@@ -544,14 +570,12 @@
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
     <value type="QString" key="PerfRecordArgsId">-e cpu-cycles --call-graph &quot;dwarf,4096&quot; -F 250</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">appQMLCDash</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeRunConfiguration.</value>
-    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">appQMLCDash</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.CustomExecutableRunConfiguration</value>
+    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey"></value>
     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
-    <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">C:/Users/nickd/Desktop/CURRENT WORKING VERSION/The-Better-Dashboard-/build/Desktop_Qt_6_9_3_MinGW_64_bit-Debug</value>
    </valuemap>
    <value type="qlonglong" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
   </valuemap>

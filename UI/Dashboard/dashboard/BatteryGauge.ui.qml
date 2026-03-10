@@ -74,7 +74,7 @@ Item {
 
         Text {
             anchors.centerIn: parent
-            text: batteryGauge.level + "%"
+            text: (batteryGauge.level).toFixed(2) + "%"
             color: "white"
             font.pixelSize: 20
             rotation: 90

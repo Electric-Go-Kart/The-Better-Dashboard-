@@ -53,10 +53,12 @@ bool CANController::initialize(const QString &interfaceName)
     }
 
     // Remove bitrate configuration explicitly FOR VCAN TEST ONLY
-    device->setConfigurationParameter(QCanBusDevice::ReceiveOwnKey, true);
-    device->setConfigurationParameter(QCanBusDevice::LoopbackKey, true);
-    device->setConfigurationParameter(QCanBusDevice::BitRateKey, QVariant());
+    //device->setConfigurationParameter(QCanBusDevice::ReceiveOwnKey, true);
+    //device->setConfigurationParameter(QCanBusDevice::LoopbackKey, true);
+    //device->setConfigurationParameter(QCanBusDevice::BitRateKey, QVariant());
 
+    // Add for actual CAN
+    device->setConfigurationParameter(QCanBusDevice::BitRateKey, 500000);
 
 
     if (!device->connectDevice()) {
@@ -77,18 +79,26 @@ bool CANController::initialize(const QString &interfaceName)
 
 void CANController::processIncomingFrame()
 {
-    qDebug() << "CAN processIncomingFrame called";
+    //qDebug() << "CAN processIncomingFrame called";
+
     while (device->framesAvailable()) {
         QCanBusFrame frame = device->readFrame();
         int id = frame.frameId();
         QByteArray data = frame.payload();
 
+        //qDebug() << "Full Frame:" << frame;
+
+        qDebug() << QString("CAN RX | ID: 0x%1 | DLC: %2 | DATA: %3")
+                        .arg(frame.frameId(), 0, 16)
+                        .arg(frame.payload().size())
+                        .arg(frame.payload().toHex(' ').toUpper());
+        qDebug() << "Extended?" << frame.hasExtendedFrameFormat();
 
         if (id == LEFT_MOTOR_FRAME_ID) {
             int rpm = decodeRpm(data);
             float current = decodeCurrent(data);
             float voltage = decodeVoltage(data);
-
+            //qDebug() << rpm;
             leftMotor.updateValues(rpm, voltage, current, deltaTime);
         }
 
@@ -108,6 +118,7 @@ int CANController::decodeRpm(const QByteArray &p)
 {
     // Bytes 0–3 : Big-endian RPM
     int raw = (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | (p[3]);
+    //qDebug() << "RPM raw:" << raw;
     return raw; // already scaled
 }
 
@@ -125,6 +136,8 @@ float CANController::decodeVoltage(const QByteArray &p)
     short raw = (p[6] << 8) | (p[7]);
     return raw / 10.0f;
 }
+
+/*
 
 void CANController::start()
 {
@@ -154,6 +167,7 @@ void CANController::generateFakeCanData()
     //device->writeFrame(frame);
     //std::cout << "frame = 00 00 0B B8 00 69 01 F4";
 
+
     if (!device)
         return;
 
@@ -180,4 +194,6 @@ void CANController::generateFakeCanData()
                  << "Payload:" << readBack.payload().toHex();
     }
 
+
 }
+*/
