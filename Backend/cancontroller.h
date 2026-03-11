@@ -4,7 +4,8 @@
 #include <QObject>
 #include <QCanBus>
 #include <QCanBusDevice>
-#include "MotorDataProcessor.h"
+#include <QTimer>
+#include "motordataprocessor.h"
 #include <QQmlEngine>
 
 class CANController : public QObject {
@@ -13,7 +14,7 @@ class CANController : public QObject {
 
 public:
     explicit CANController(QObject *parent = nullptr);
-    bool initialize(const QString &interfaceName = "vcan0");
+    bool initialize(const QString &interfaceName = "can0", bool testMode = false);
     void start();
 
 signals:
@@ -29,23 +30,58 @@ signals:
     void rightMotorVoltageUpdated(float voltage);
     void rightMotorPowerUpdated(float power);
     void rightMotorSocUpdated(float soc);
+    void canConnectionChanged(bool connected);
+    void canStatusChanged(const QString &status);
+    void canError(const QString &message);
 
 private slots:
     void processIncomingFrame();
-    //for testing
+    void handleCanError(QCanBusDevice::CanBusError error);
+    void handleCanStateChanged(QCanBusDevice::CanBusDeviceState state);
+    void attemptReconnect();
+    void sendParkHeartbeat();
+    // For test mode only.
     void generateFakeCanData();
 
+public slots:
+    void setParkEnabled(bool enabled);
+    void setReverseEnabled(bool enabled);
+    void setLightsEnabled(bool enabled);
+    void setLockEnabled(bool enabled);
+
 private:
+    bool connectDevice();
+    bool writeFrame(quint32 frameId, const QByteArray &payload, bool extendedFrame = true);
+    void sendDriveModeFrame();
+    void sendBrakeCurrentFrame(float brakeCurrentA);
+    void sendZeroCurrentFrame();
+    QByteArray encodeCurrentPayload(float currentA) const;
+    float activeBrakeCurrentA() const;
+
     QCanBusDevice *device = nullptr;
-    QCanBusDevice *device2 = nullptr;
+    QTimer reconnectTimer;
+    QTimer parkHeartbeatTimer;
+    bool testModeEnabled = false;
 
     // Two motors: left and right
     MotorDataProcessor leftMotor;
     MotorDataProcessor rightMotor;
 
-    // Example CAN IDs — replace with correct ones if needed
-    const int LEFT_MOTOR_FRAME_ID  = 0x901; //0x09;
-    const int RIGHT_MOTOR_FRAME_ID = 0x902; //0x0A;
+    // VESC style default telemetry IDs (status packets)
+    const quint32 LEFT_MOTOR_FRAME_ID = 0x901;
+    const quint32 RIGHT_MOTOR_FRAME_ID = 0x902;
+
+    // VESC style packet IDs packed into the upper 8 bits of EID.
+    const quint32 CAN_PACKET_SET_CURRENT = 1;
+    const quint32 CAN_PACKET_SET_CURRENT_BRAKE = 2;
+    const quint32 APP_MODE_PACKET_ID = 0x7F;
+    int leftControllerId = 1;
+    int rightControllerId = 2;
+    float parkBrakeCurrentA = 12.0f;
+    bool parkEnabled = false;
+    bool reverseEnabled = false;
+    bool lightsEnabled = false;
+    bool lockEnabled = false;
 
     float decodeCurrent(const QByteArray &payload);
     int decodeRpm(const QByteArray &payload);

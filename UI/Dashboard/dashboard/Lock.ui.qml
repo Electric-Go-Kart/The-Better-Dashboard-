@@ -14,22 +14,22 @@ Item {
     id: root
     width: 100
     height: 40
+    property bool locked: dashboardController.lockEnabled
 
     Button {
         id: lockButton
         visible: true
-        // Temporary test variable — REMOVE later
-        property bool fakeLock: true
         opacity: 1
-        text: /*dashboardcontroller.lock*/ fakeLock ? "Lock" : "Unlock"
+        text: root.locked ? "Unlock" : "Lock"
         anchors.fill: parent
         rotation: 0
         flat: false
+        onClicked: dashboardController.toggleLock()
 
         background: Rectangle {
             id: bg
             radius: 10
-            color: fakeLock ? "#2ecc71" : "#e74c3c" // green / red
+            color: root.locked ? "#e74c3c" : "#2ecc71"
             border.width: 2
             border.color: "#222"
 
@@ -50,11 +50,6 @@ Item {
                     easing.type: Easing.InOutQuad
                 }
             }
-        }
-
-        TapHandler {
-            id: tapper
-            onTapped: lockButton.fakeLock = !lockButton.fakeLock
         }
     }
 }

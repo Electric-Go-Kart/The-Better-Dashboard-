@@ -1,0 +1,14 @@
+[Unit]
+Description=Bring up CAN interface for dashboard
+After=network-pre.target
+Before=multi-user.target
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=CAN_BITRATE=500000
+ExecStart=/usr/local/bin/can0-setup.sh can0
+
+[Install]
+WantedBy=multi-user.target

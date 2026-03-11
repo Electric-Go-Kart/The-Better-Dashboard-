@@ -42,7 +42,7 @@ Item {
 
         Image {
                 id: ramsLogo
-                visible: DashboardController.locked
+                visible: dashboardController.lockEnabled
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
                 source: "../images/CSU-Ram-Rev.png"

@@ -22,6 +22,7 @@ qt_add_qml_module(appQMLCDash
             test.h test.cpp
             Backend/cancontroller.h Backend/cancontroller.cpp
             Backend/dashboardcontroller.h Backend/dashboardcontroller.cpp
+            Backend/drivestatemanager.h Backend/drivestatemanager.cpp
             Backend/motordataprocessor.h Backend/motordataprocessor.cpp
 
         QML_FILES

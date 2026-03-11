@@ -14,22 +14,22 @@ Item {
     id: root
     width: 100
     height: 40
+    property bool parked: dashboardController.parkEngaged
 
     Button {
         id: parkButton
         visible: true
-        // Temporary test variable — REMOVE later
-        property bool fakePark: true
         opacity: 1
-        text: /*dashboardcontroller.park*/ fakePark ? "Park" : "Parked"
+        text: root.parked ? "Parked" : "Park"
         anchors.fill: parent
         rotation: 0
         flat: false
+        onClicked: dashboardController.togglePark()
 
         background: Rectangle {
             id: bg
             radius: 10
-            color: fakePark ? "#2ecc71" : "#e74c3c" // green / red
+            color: root.parked ? "#e74c3c" : "#2ecc71"
             border.width: 2
             border.color: "#222"
 
@@ -50,11 +50,6 @@ Item {
                     easing.type: Easing.InOutQuad
                 }
             }
-        }
-
-        TapHandler {
-            id: tapper
-            onTapped: parkButton.fakePark = !parkButton.fakePark
         }
     }
 }

@@ -14,22 +14,22 @@ Item {
     id: root
     width: 100
     height: 40
+    property bool lightsEnabled: dashboardController.lightsEnabled
 
     Button {
         id: lightsButton
         visible: true
-        // Temporary test variable — REMOVE later
-        property bool fakeLights: true
         opacity: 1
-        text: /*dashboardcontroller.Lights*/ fakeLights ? "Lights ON" : "Lights OFF"
+        text: root.lightsEnabled ? "Lights ON" : "Lights OFF"
         anchors.fill: parent
         rotation: 0
         flat: false
+        onClicked: dashboardController.toggleLights()
 
         background: Rectangle {
             id: bg
             radius: 10
-            color: fakeLights ? "#2ecc71" : "#e74c3c" // green / red
+            color: root.lightsEnabled ? "#2ecc71" : "#e74c3c"
             border.width: 2
             border.color: "#222"
 
@@ -50,11 +50,6 @@ Item {
                     easing.type: Easing.InOutQuad
                 }
             }
-        }
-
-        TapHandler {
-            id: tapper
-            onTapped: lightsButton.fakeLights = !lightsButton.fakeLights
         }
     }
 }

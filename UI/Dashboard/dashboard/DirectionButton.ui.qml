@@ -14,23 +14,22 @@ Item {
     id: root
     width: 100
     height: 40
+    property bool reverseEnabled: dashboardController.reverseEnabled
 
     Button {
         id: directionButton
         visible: true
-        // Temporary test variable — REMOVE later
-        property bool fakeDirection: true
         opacity: 1
-        //onClicked: dashboardcontroller.updateDirection
-        text: /*dashboardcontroller.getDirection*/  fakeDirection ? "Forward" : "Reverse"
+        text: root.reverseEnabled ? "Reverse" : "Forward"
         anchors.fill: parent
         rotation: 0
         flat: false
+        onClicked: dashboardController.toggleDirection()
 
         background: Rectangle {
             id: bg
             radius: 10
-            color: fakeDirection ? "#2ecc71" : "#e74c3c" // green / red
+            color: root.reverseEnabled ? "#e74c3c" : "#2ecc71"
             border.width: 2
             border.color: "#222"
 
@@ -52,12 +51,5 @@ Item {
                 }
             }
         }
-
-        TapHandler {
-            id: tapper
-            onTapped: directionButton.fakeDirection = !directionButton.fakeDirection
-        }
-
-        //onClicked: controller.requestDirectionChange()
     }
 }

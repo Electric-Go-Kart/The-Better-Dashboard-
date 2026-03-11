@@ -1,4 +1,4 @@
-#include "MotorDataProcessor.h"
+#include "motordataprocessor.h"
 #include <algorithm>
 
 MotorDataProcessor::MotorDataProcessor(QObject *parent)

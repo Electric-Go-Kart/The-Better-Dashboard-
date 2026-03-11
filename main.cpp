@@ -1,13 +1,13 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QProcessEnvironment>
 
-#include "Backend/DashboardController.h"
-#include "Backend/CANController.h"
+#include "Backend/dashboardcontroller.h"
+#include "Backend/cancontroller.h"
 
 int main(int argc, char *argv[])
 {
-    qDebug() << "MAIN STARTED";
     qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
 
     QGuiApplication app(argc, argv);
@@ -18,7 +18,9 @@ int main(int argc, char *argv[])
     //---------------------------------------------------
     DashboardController dashboardController;
     CANController canController;
-    canController.initialize("vcan0");
+    const QString interfaceName = qEnvironmentVariable("DASH_CAN_INTERFACE", "can0");
+    const bool testMode = qEnvironmentVariable("DASH_CAN_TEST_MODE", "0") == "1";
+    canController.initialize(interfaceName, testMode);
     canController.start();
 
     //---------------------------------------------------
@@ -57,7 +59,21 @@ int main(int argc, char *argv[])
     QObject::connect(&canController, &CANController::rightMotorPowerUpdated,
                      &dashboardController, &DashboardController::updateRightPower);
 
-    // (Add others if you want current/voltage/power)
+    QObject::connect(&canController, &CANController::canConnectionChanged,
+                     &dashboardController, &DashboardController::updateCanConnection);
+    QObject::connect(&canController, &CANController::canStatusChanged,
+                     &dashboardController, &DashboardController::updateCanStatus);
+    QObject::connect(&canController, &CANController::canError,
+                     &dashboardController, &DashboardController::updateCanError);
+
+    QObject::connect(&dashboardController, &DashboardController::parkCommandRequested,
+                     &canController, &CANController::setParkEnabled);
+    QObject::connect(&dashboardController, &DashboardController::directionCommandRequested,
+                     &canController, &CANController::setReverseEnabled);
+    QObject::connect(&dashboardController, &DashboardController::lightsCommandRequested,
+                     &canController, &CANController::setLightsEnabled);
+    QObject::connect(&dashboardController, &DashboardController::lockCommandRequested,
+                     &canController, &CANController::setLockEnabled);
 
     //---------------------------------------------------
     // 3. Expose dashboardController to QML
@@ -75,8 +91,6 @@ int main(int argc, char *argv[])
         Qt::QueuedConnection);
 
     engine.loadFromModule("QMLCDash", "Main");
-
-    qDebug() << "Main CANController instance:" << &canController;
 
     return app.exec();
 }
