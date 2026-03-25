@@ -9,6 +9,7 @@ Check out https://doc.qt.io/qtcreator/creator-quick-ui-forms.html for details on
 import QtQuick
 import QtQuick.Controls
 import QMLCDash
+import "Theme.js" as Theme
 
 Item {
     id: root
@@ -29,9 +30,9 @@ Item {
         background: Rectangle {
             id: bg
             radius: 10
-            color: root.parked ? "#e74c3c" : "#2ecc71"
+            color: root.parked ? Theme.danger : Theme.csuGreenBright
             border.width: 2
-            border.color: "#222"
+            border.color: Theme.csuGold
 
             // Press feedback — slightly shrink on touch
             scale: parkButton.down ? 0.95 : 1.0

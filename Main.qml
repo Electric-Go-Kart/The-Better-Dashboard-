@@ -10,7 +10,7 @@ Window {
     id: window
     width: 800
     height: 480
-    visible: false
+    visible: true
     //visibility: "FullScreen"
     //color: "darkslategrey"
 
@@ -18,10 +18,17 @@ Window {
     //flags: Qt.FramelessWindowHint
 
     StackView {
-            id: stackView
-            anchors.fill: parent
-            initialItem: "./UI/Dashboard/App.qml"  // 👈 Start with this page
+        id: mainStack
+        anchors.fill: parent
+        initialItem: dashboardPageComponent
+    }
+
+    Component {
+        id: dashboardPageComponent
+        App {
+            stackView: mainStack
         }
+    }
 
 
 

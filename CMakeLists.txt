@@ -27,6 +27,7 @@ qt_add_qml_module(appQMLCDash
 
         QML_FILES
             UI/Dashboard/App.qml
+            UI/Dashboard/SettingsPage.qml
             UI/Dashboard/dashboard/BatteryGauge.ui.qml
             UI/Dashboard/dashboard/CurrentDraw.ui.qml
             UI/Dashboard/dashboard/Dashboard.ui.qml
@@ -39,6 +40,7 @@ qt_add_qml_module(appQMLCDash
             UI/Dashboard/dashboard/Speedometer.ui.qml
 
         RESOURCES UI/Dashboard/images/CSU-Ram-Rev.png
+                  UI/Dashboard/dashboard/Theme.js
 
         #QML_FILES Speedometer.qml
         #QML_FILES Dashboard.qml

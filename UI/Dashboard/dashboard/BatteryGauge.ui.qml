@@ -9,6 +9,7 @@ Check out https://doc.qt.io/qtcreator/creator-quick-ui-forms.html for details on
 import QtQuick
 import QtQuick.Controls
 import QMLCDash
+import "Theme.js" as Theme
 //import QtQuick.Studio.DesignEffects
 
 Item {
@@ -28,15 +29,17 @@ Item {
         id: frame
         radius: 7
         anchors.fill: parent
+        border.width: 1
+        border.color: Theme.csuGold
         gradient: Gradient {
             GradientStop {
                 position: 0
-                color: "#700505"
+                color: "#17362f"
             }
 
             GradientStop {
                 position: 1
-                color: "#000000"
+                color: Theme.surface
             }
             orientation: Gradient.Vertical
         }
@@ -51,12 +54,12 @@ Item {
             gradient: Gradient {
                 GradientStop {
                     position: 0
-                    color: "#0d3716"
+                    color: Theme.csuGreenBright
                 }
 
                 GradientStop {
                     position: 1
-                    color: "#000000"
+                    color: Theme.panelDark
                 }
                 orientation: Gradient.Vertical
             }
@@ -75,7 +78,7 @@ Item {
         Text {
             anchors.centerIn: parent
             text: batteryGauge.level + "%"
-            color: "white"
+            color: Theme.textPrimary
             font.pixelSize: 20
             rotation: 90
             font.bold: true

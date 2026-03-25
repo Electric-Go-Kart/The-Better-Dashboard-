@@ -9,6 +9,7 @@ Check out https://doc.qt.io/qtcreator/creator-quick-ui-forms.html for details on
 import QtQuick
 import QtQuick.Controls
 import QMLCDash
+import "Theme.js" as Theme
 
 Item {
     id: root
@@ -18,10 +19,8 @@ Item {
     Button {
         id: shutDownButton
         visible: true
-        // Temporary test variable — REMOVE later
-        property bool fakeShutDown: true
         opacity: 1
-        text: /*dashboardcontroller.ShutDown*/ fakeShutDown ? "Shut Down" : "Shutting Down"
+        text: "Shut Down"
         anchors.fill: parent
         rotation: 0
         flat: false
@@ -29,9 +28,9 @@ Item {
         background: Rectangle {
             id: bg
             radius: 10
-            color: fakeShutDown ? "#2ecc71" : "#e74c3c" // green / red
+            color: Theme.panelDark
             border.width: 2
-            border.color: "#222"
+            border.color: Theme.csuGold
 
             // Press feedback — slightly shrink on touch
             scale: shutDownButton.down ? 0.95 : 1.0
@@ -50,11 +49,6 @@ Item {
                     easing.type: Easing.InOutQuad
                 }
             }
-        }
-
-        TapHandler {
-            id: tapper
-            onTapped: shutDownButton.fakeShutDown = !shutDownButton.fakeShutDown
         }
     }
 }

@@ -16,6 +16,8 @@ class DashboardController : public QObject {
     Q_PROPERTY(bool canOnline READ canOnline NOTIFY canOnlineChanged)
     Q_PROPERTY(QString canStatus READ canStatus NOTIFY canStatusChanged)
     Q_PROPERTY(QString lastControlError READ lastControlError NOTIFY lastControlErrorChanged)
+    Q_PROPERTY(bool settingsAccessAllowed READ settingsAccessAllowed NOTIFY settingsAccessAllowedChanged)
+    Q_PROPERTY(QString driveMode READ driveMode NOTIFY driveModeChanged)
 
 public:
     explicit DashboardController(QObject *parent = nullptr);
@@ -27,6 +29,8 @@ public:
     bool canOnline() const;
     QString canStatus() const;
     QString lastControlError() const;
+    bool settingsAccessAllowed() const;
+    QString driveMode() const;
 
 signals:
     // Left Motor UI
@@ -50,6 +54,8 @@ signals:
     void canOnlineChanged(bool online);
     void canStatusChanged(const QString &status);
     void lastControlErrorChanged(const QString &errorMessage);
+    void settingsAccessAllowedChanged(bool allowed);
+    void driveModeChanged(const QString &mode);
 
     // Command path into CANController.
     void parkCommandRequested(bool enabled);
@@ -80,6 +86,7 @@ public slots:
     Q_INVOKABLE void toggleLights();
     Q_INVOKABLE void toggleLock();
     Q_INVOKABLE void clearFault();
+    Q_INVOKABLE void setDriveMode(const QString &mode);
 
 private slots:
     void onDriveStateLabelChanged(const QString &stateLabel);
@@ -96,6 +103,9 @@ private:
     bool canConnected = false;
     QString canState = "Disconnected";
     QString controlError = "";
+    bool settingsAllowed = true;
+    int settingsRpmThreshold = 120;
+    QString selectedDriveMode = "Normal";
 };
 
 #endif 

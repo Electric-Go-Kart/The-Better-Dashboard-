@@ -1,4 +1,5 @@
 #include "dashboardcontroller.h"
+#include <QtGlobal>
 
 DashboardController::DashboardController(QObject *parent)
     : QObject(parent)
@@ -53,11 +54,27 @@ QString DashboardController::lastControlError() const
     return controlError;
 }
 
+bool DashboardController::settingsAccessAllowed() const
+{
+    return settingsAllowed;
+}
+
+QString DashboardController::driveMode() const
+{
+    return selectedDriveMode;
+}
+
 // LEFT MOTOR ------------------
 
 void DashboardController::updateLeftRpm(int rpm) {
     lastLeftRpmValue = rpm;
     driveStateManager.updateSpeedRpm(lastLeftRpmValue, lastRightRpmValue);
+    const bool allowed = (qAbs(lastLeftRpmValue) <= settingsRpmThreshold
+                          && qAbs(lastRightRpmValue) <= settingsRpmThreshold);
+    if (allowed != settingsAllowed) {
+        settingsAllowed = allowed;
+        emit settingsAccessAllowedChanged(settingsAllowed);
+    }
     emit leftRpmChanged(rpm);
 }
 
@@ -83,6 +100,12 @@ void DashboardController::updateLeftSoc(float soc) {
 void DashboardController::updateRightRpm(int rpm) {
     lastRightRpmValue = rpm;
     driveStateManager.updateSpeedRpm(lastLeftRpmValue, lastRightRpmValue);
+    const bool allowed = (qAbs(lastLeftRpmValue) <= settingsRpmThreshold
+                          && qAbs(lastRightRpmValue) <= settingsRpmThreshold);
+    if (allowed != settingsAllowed) {
+        settingsAllowed = allowed;
+        emit settingsAccessAllowedChanged(settingsAllowed);
+    }
     emit rightRpmChanged(rpm);
 }
 
@@ -171,6 +194,15 @@ void DashboardController::clearFault()
     emit lastControlErrorChanged(controlError);
     emit parkCommandRequested(driveStateManager.isParkEngaged());
     emit directionCommandRequested(driveStateManager.isReverseEnabled());
+}
+
+void DashboardController::setDriveMode(const QString &mode)
+{
+    if (selectedDriveMode == mode) {
+        return;
+    }
+    selectedDriveMode = mode;
+    emit driveModeChanged(selectedDriveMode);
 }
 
 void DashboardController::onDriveStateLabelChanged(const QString &stateLabel)

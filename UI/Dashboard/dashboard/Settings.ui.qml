@@ -9,29 +9,30 @@ Check out https://doc.qt.io/qtcreator/creator-quick-ui-forms.html for details on
 import QtQuick
 import QtQuick.Controls
 import QMLCDash
+import "Theme.js" as Theme
 
 Item {
     id: root
     width: 100
     height: 40
+    signal settingsPressed()
 
     Button {
         id: settings
         visible: true
-        // Temporary test variable — REMOVE later
-        property bool fakeSettings: true
         opacity: 1
-        text: /*dashboardcontroller.settings*/ fakeSettings ? "Settings" : "_Settings_"
+        text: "Settings"
         anchors.fill: parent
         rotation: 0
         flat: false
+        onClicked: root.settingsPressed()
 
         background: Rectangle {
             id: bg
             radius: 10
-            color: fakeSettings ? "#2ecc71" : "#e74c3c" // green / red
+            color: Theme.csuGreen
             border.width: 2
-            border.color: "#222"
+            border.color: Theme.csuGold
 
             // Press feedback — slightly shrink on touch
             scale: settings.down ? 0.95 : 1.0
@@ -50,11 +51,6 @@ Item {
                     easing.type: Easing.InOutQuad
                 }
             }
-        }
-
-        TapHandler {
-            id: tapper
-            onTapped: settings.fakeSettings = !settings.fakeSettings
         }
     }
 }

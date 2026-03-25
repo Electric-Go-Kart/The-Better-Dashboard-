@@ -9,6 +9,7 @@ Check out https://doc.qt.io/qtcreator/creator-quick-ui-forms.html for details on
 import QtQuick
 import QtQuick.Controls
 import QMLCDash
+import "Theme.js" as Theme
 
 Item {
     id: root
@@ -27,28 +28,31 @@ Item {
         width: 350
         height: 350
         radius: 175
+        border.width: 2
+        border.color: Theme.csuGold
         gradient: Gradient {
             GradientStop {
                 position: 0
-                color: "#3f2626"
+                color: "#17362f"
             }
 
             GradientStop {
                 position: 1
-                color: "#000000"
+                color: "#0c1412"
             }
             orientation: Gradient.Vertical
         }
 
         Image {
                 id: ramsLogo
-                visible: dashboardController.lockEnabled
+                visible: true
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
                 source: "../images/CSU-Ram-Rev.png"
                 mipmap: true
-                width: 350
-                height: 350
+                opacity: dashboardController.lockEnabled ? 0.35 : 0.16
+                width: 220
+                height: 220
             }
 
         Text {
@@ -56,10 +60,11 @@ Item {
             x: 142
             y: 142
             width: 67
-            color: "#eaeaea"
+            color: Theme.textPrimary
             //text: qsTr("0")
             text: qsTr("%1").arg(root.speed)
             font.pixelSize: 50
+            font.bold: true
             horizontalAlignment: Text.AlignHCenter
         }
 
@@ -67,9 +72,10 @@ Item {
             id: text1
             x: 154
             y: 225
-            color: "#eaeaea"
+            color: Theme.textMuted
             text: qsTr("rpm")
             font.pixelSize: 24
+            font.bold: true
         }
     }
 }

@@ -9,6 +9,7 @@ Check out https://doc.qt.io/qtcreator/creator-quick-ui-forms.html for details on
 import QtQuick
 import QtQuick.Controls
 import QMLCDash
+import "Theme.js" as Theme
 
 Item {
     id: currentDraw
@@ -25,9 +26,11 @@ Item {
 
     Rectangle {
         id: frame
-        color: "#030303"
+        color: Theme.surface
         radius: 7
         anchors.fill: parent
+        border.width: 1
+        border.color: Theme.csuGold
 
         Rectangle {
             id: fillBar
@@ -39,12 +42,12 @@ Item {
             gradient: Gradient {
                 GradientStop {
                     position: 0
-                    color: "#d81505"
+                    color: Theme.warning
                 }
 
                 GradientStop {
                     position: 1
-                    color: "#c65c03"
+                    color: "#A15A1D"
                 }
                 orientation: Gradient.Vertical
             }
@@ -63,7 +66,7 @@ Item {
         Text {
             anchors.centerIn: parent
             text: currentDraw.level + "A"
-            color: "white"
+            color: Theme.textPrimary
             font.pixelSize: 20
             rotation: 90
             font.bold: true
