@@ -12,8 +12,8 @@ import QMLCDash
 
 Item {
     id: root
-    width: 100
-    height: 40
+    width: parent.width * 0.125
+    height: parent.height * 0.1
 
     Button {
         id: shutDownButton

@@ -14,6 +14,7 @@ class CANController : public QObject {
 public:
     explicit CANController(QObject *parent = nullptr);
     bool initialize(const QString &interfaceName = "can0"); //vcan0 for testing
+    //For testing
     //void start();
 
 signals:
@@ -30,14 +31,19 @@ signals:
     void rightMotorPowerUpdated(float power);
     void rightMotorSocUpdated(float soc);
 
+    void directionChanged(QString direction);
+
+public slots:
+    void setDirection(const QString &direction);
+
 private slots:
     void processIncomingFrame();
     //for testing
     //void generateFakeCanData();
 
 private:
+    // Create CAN device instance
     QCanBusDevice *device = nullptr;
-    QCanBusDevice *device2 = nullptr;
 
     // Two motors: left and right
     MotorDataProcessor leftMotor;
@@ -50,6 +56,12 @@ private:
     float decodeCurrent(const QByteArray &payload);
     int decodeRpm(const QByteArray &payload);
     float decodeVoltage(const QByteArray &payload);
+
+
+    int reverse_pin = 26;   // GPIO pin number
+    bool locked = false;
+    QString direction;
+
 
     float deltaTime = 0.02f;   // 20ms update cycle
 };

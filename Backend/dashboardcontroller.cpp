@@ -49,3 +49,10 @@ void DashboardController::updateRightPower(float p) {
 void DashboardController::updateRightSoc(float soc) {
     emit rightSocChanged(soc);
 }
+
+// DIRECTION CHANGE ------------------
+
+void DashboardController::requestDirectionChange(const QString &direction)
+{
+    emit directionRequested(direction);
+}

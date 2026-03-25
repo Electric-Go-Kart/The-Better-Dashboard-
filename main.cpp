@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     //---------------------------------------------------
     DashboardController dashboardController;
     CANController canController;
-    canController.initialize("can0");
+    canController.initialize("can0"); // Comment out for testing UI without CAN
     //canController.start();
 
     //---------------------------------------------------
@@ -75,6 +75,11 @@ int main(int argc, char *argv[])
                      &CANController::rightMotorPowerUpdated,
                      &dashboardController,
                      &DashboardController::updateRightPower);
+
+    //DIRECTION
+    QObject::connect(&dashboardController,
+                     &DashboardController::directionRequested,
+                     &canController, &CANController::setDirection);
 
     // (Add others if you want current/voltage/power)
 

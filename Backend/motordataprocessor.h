@@ -19,6 +19,7 @@ public:
     float getInstantPower() const { return instantPower; }
     float getEnergyUsedWh() const { return energyUsedWh; }
     float getStateOfCharge() const { return stateOfCharge; }
+    int getRpm() const { return rpm; }
 
 signals:
     void rpmUpdated(int rpm);
