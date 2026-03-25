@@ -28,6 +28,8 @@ qt_add_qml_module(appQMLCDash
             UI/Dashboard/App.qml
             UI/Dashboard/dashboard/BatteryGaugeLeft.qml
             UI/Dashboard/dashboard/CurrentDrawLeft.qml
+            UI/Dashboard/dashboard/BatteryGaugeRight.qml
+            UI/Dashboard/dashboard/CurrentDrawRight.qml
             UI/Dashboard/dashboard/Dashboard.qml
             UI/Dashboard/dashboard/DirectionButton.qml
             UI/Dashboard/dashboard/Lights.qml
