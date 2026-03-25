@@ -13,13 +13,13 @@ import QMLCDash
 
 Item {
     id: batteryGauge
-    width: 20
-    height: 400
-    property real level: 100   // starts at 100%
+    width: 100
+    height: 40
+    property real level: 75   // starts at 100%
 
         Connections {
             target: dashboardController
-            onLeftSocChanged: {
+            function onRightSocChanged(soc){
                 batteryGauge.level = soc; // updated directly from MotorDataProcessor via DashboardController
             }
         }
@@ -28,6 +28,8 @@ Item {
         id: frame
         radius: 7
         anchors.fill: parent
+        color: "#708090"
+        /*
         gradient: Gradient {
             GradientStop {
                 position: 0
@@ -38,15 +40,17 @@ Item {
                 position: 1
                 color: "#000000"
             }
-            orientation: Gradient.Vertical
+            orientation: Gradient.Horizontal
         }
+        */
 
         Rectangle {
             id: fillBar
             x: 0
-            width: 20
+            height: 40
             //height: dashboardcontroller.charge
-            //color: "#0f3704"
+            color: "#32cd32"
+            /*
             anchors.bottom: parent.bottom
             gradient: Gradient {
                 GradientStop {
@@ -58,10 +62,11 @@ Item {
                     position: 1
                     color: "#000000"
                 }
-                orientation: Gradient.Vertical
+                orientation: Gradient.Horizontal
             }
+            */
 
-            height: (parent.height - 8) * (batteryGauge.level / 100)
+            width: (parent.width - 1) * (batteryGauge.level / 100)
             radius: 7
 
             Behavior on height {
@@ -77,7 +82,7 @@ Item {
             text: (batteryGauge.level).toFixed(2) + "%"
             color: "white"
             font.pixelSize: 20
-            rotation: 90
+            rotation: 0
             font.bold: true
         }
     }
