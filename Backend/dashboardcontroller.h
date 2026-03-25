@@ -26,6 +26,9 @@ signals:
     void rightPowerChanged(float power);
     void rightSocChanged(float soc);
 
+    // Direction Change
+    void directionRequested(const QString &direction);
+
 public slots:
     // Slots receiving values from CANController
     void updateLeftRpm(int rpm);
@@ -39,6 +42,8 @@ public slots:
     void updateRightVoltage(float v);
     void updateRightPower(float p);
     void updateRightSoc(float soc);
+
+    void requestDirectionChange(const QString &direction);
 };
 
 #endif 

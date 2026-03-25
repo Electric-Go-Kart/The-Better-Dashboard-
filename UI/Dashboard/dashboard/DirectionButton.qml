@@ -12,16 +12,28 @@ import QMLCDash
 
 Item {
     id: root
-    width: 100
-    height: 40
+    width: parent.width * 0.125
+    height: parent.height * 0.1
 
     Button {
-        id: lightsButton
+        id: directionButton
         visible: true
         // Temporary test variable — REMOVE later
-        property bool fakeLights: true
+        //property bool fakeDirection: true
         opacity: 1
-        text: /*dashboardcontroller.Lights*/ fakeLights ? "Lights ON" : "Lights OFF"
+        property string currentDirection: "forward"
+
+            text: currentDirection
+
+            onClicked: {
+                if (currentDirection === "forward") {
+                    currentDirection = "reverse"
+                } else {
+                    currentDirection = "forward"
+                }
+
+                dashboardController.requestDirectionChange(currentDirection)
+            }
         anchors.fill: parent
         rotation: 0
         flat: false
@@ -29,12 +41,12 @@ Item {
         background: Rectangle {
             id: bg
             radius: 10
-            color: fakeLights ? "#2ecc71" : "#e74c3c" // green / red
+            color: directionButton.currentDirection ? "#2ecc71" : "#e74c3c" // green / red
             border.width: 2
             border.color: "#222"
 
             // Press feedback — slightly shrink on touch
-            scale: lightsButton.down ? 0.95 : 1.0
+            scale: directionButton.down ? 0.95 : 1.0
 
             Behavior on scale {
                 NumberAnimation {
@@ -52,9 +64,13 @@ Item {
             }
         }
 
+
+/*
         TapHandler {
             id: tapper
-            onTapped: lightsButton.fakeLights = !lightsButton.fakeLights
+            onTapped: directionButton.fakeDirection = !directionButton.fakeDirection
         }
+*/
+        //onClicked: controller.requestDirectionChange()
     }
 }

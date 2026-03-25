@@ -137,8 +137,31 @@ float CANController::decodeVoltage(const QByteArray &p)
     return raw / 10.0f;
 }
 
-/*
+// ---------------- CHANGE DIRECTIONS ------------------
 
+void CANController::setDirection(const QString &direction)
+{
+    int rpm1 = leftMotor.getRpm();
+    int rpm2 = rightMotor.getRpm();
+    if (rpm1 == 0 && rpm2 == 0 && !locked)
+    {
+        if (direction == "reverse")
+        {
+            system("gpioset gpiochip0 26=0");   // LOW
+        }
+        else if (direction == "forward" || direction == "parked")
+        {
+            system("gpioset gpiochip0 26=1");   // HIGH
+        }
+
+        this->direction = direction;
+        emit directionChanged(this->direction);
+
+        qDebug() << ">>>>>>>" << direction;
+    }
+}
+
+/*
 void CANController::start()
 {
     // REMOVE after real CAN hardware is ready
@@ -146,28 +169,30 @@ void CANController::start()
     connect(fakeTimer, &QTimer::timeout, this, &CANController::generateFakeCanData);
     fakeTimer->start(600); // update every 200ms
 }
+
+
 void CANController::generateFakeCanData()
 {
     // Fake Left Motor
 //    emit leftMotorRpmUpdated(QRandomGenerator::global()->bounded(0, 6000));
-//    emit leftMotorCurrentUpdated(QRandomGenerator::global()->bounded(0, 30) / 1.0f);
+    emit leftMotorCurrentUpdated(QRandomGenerator::global()->bounded(0, 30) / 1.0f);
     //emit leftVoltageReceived(QRandomGenerator::global()->bounded(40.0f, 60.0f));
     //emit leftPowerReceived(QRandomGenerator::global()->bounded(0.0f, 2000.0f));
 //    emit leftMotorSocUpdated(QRandomGenerator::global()->bounded(0, 100) / 1.0f);
 
     // Fake Right Motor
     //emit rightRpmReceived(QRandomGenerator::global()->bounded(0, 6000));
-    //emit rightCurrentReceived(QRandomGenerator::global()->bounded(0.0f, 30.0f));
+    emit rightMotorCurrentUpdated(QRandomGenerator::global()->bounded(0, 90) / 1.0f);
     //emit rightVoltageReceived(QRandomGenerator::global()->bounded(40.0f, 60.0f));
     //emit rightPowerReceived(QRandomGenerator::global()->bounded(0.0f, 2000.0f));
     //emit rightSocReceived(QRandomGenerator::global()->bounded(0.0f, 100.0f));
 
-
+    // VCAN fake CAN bus frame
     //QCanBusFrame frame(0x123, QByteArray::fromHex("00 00 0B B8 00 69 01 F4"));
     //device->writeFrame(frame);
     //std::cout << "frame = 00 00 0B B8 00 69 01 F4";
 
-
+/*
     if (!device)
         return;
 

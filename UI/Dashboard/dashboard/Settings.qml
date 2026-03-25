@@ -12,16 +12,16 @@ import QMLCDash
 
 Item {
     id: root
-    width: 100
-    height: 40
+    width: parent.width * 0.125
+    height: parent.height * 0.1
 
     Button {
-        id: lockButton
+        id: settings
         visible: true
         // Temporary test variable — REMOVE later
-        property bool fakeLock: true
+        property bool fakeSettings: true
         opacity: 1
-        text: /*dashboardcontroller.lock*/ fakeLock ? "Lock" : "Unlock"
+        text: /*dashboardcontroller.settings*/ fakeSettings ? "Settings" : "_Settings_"
         anchors.fill: parent
         rotation: 0
         flat: false
@@ -29,12 +29,12 @@ Item {
         background: Rectangle {
             id: bg
             radius: 10
-            color: fakeLock ? "#2ecc71" : "#e74c3c" // green / red
+            color: fakeSettings ? "#2ecc71" : "#e74c3c" // green / red
             border.width: 2
             border.color: "#222"
 
             // Press feedback — slightly shrink on touch
-            scale: lockButton.down ? 0.95 : 1.0
+            scale: settings.down ? 0.95 : 1.0
 
             Behavior on scale {
                 NumberAnimation {
@@ -54,7 +54,7 @@ Item {
 
         TapHandler {
             id: tapper
-            onTapped: lockButton.fakeLock = !lockButton.fakeLock
+            onTapped: settings.fakeSettings = !settings.fakeSettings
         }
     }
 }

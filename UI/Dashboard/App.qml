@@ -3,8 +3,8 @@ import QtQuick
 import "./dashboard"
 
 Window {
-    width: mainScreen.width
-    height: mainScreen.height
+    width: 800
+    height: 480
     // Removes the title bar and window frame
     //flags: Qt.FramelessWindowHint
 

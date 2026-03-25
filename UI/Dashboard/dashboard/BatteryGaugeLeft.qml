@@ -9,47 +9,64 @@ Check out https://doc.qt.io/qtcreator/creator-quick-ui-forms.html for details on
 import QtQuick
 import QtQuick.Controls
 import QMLCDash
+//import QtQuick.Studio.DesignEffects
 
 Item {
-    id: currentDraw
-    width: 20
-    height: 400
-    property real level: 0   // starts at 100%
+    id: batteryGauge
+    width: 100
+    height: 40
+    property real level: 75   // starts at 100%
 
         Connections {
             target: dashboardController
-            onLeftCurrentChanged: {
-                currentDraw.level = current; // updated directly from MotorDataProcessor via DashboardController
+            function onLeftSocChanged(soc){
+                batteryGauge.level = soc; // updated directly from MotorDataProcessor via DashboardController
             }
         }
 
     Rectangle {
         id: frame
-        color: "#030303"
         radius: 7
         anchors.fill: parent
+        color: "#708090"
+        /*
+        gradient: Gradient {
+            GradientStop {
+                position: 0
+                color: "#700505"
+            }
+
+            GradientStop {
+                position: 1
+                color: "#000000"
+            }
+            orientation: Gradient.Horizontal
+        }
+        */
 
         Rectangle {
             id: fillBar
             x: 0
-            width: 20
+            height: 40
             //height: dashboardcontroller.charge
-            //color: "#0f3704"
+            color: "#32cd32"
+            /*
             anchors.bottom: parent.bottom
             gradient: Gradient {
                 GradientStop {
                     position: 0
-                    color: "#d81505"
+                    color: "#0d3716"
                 }
 
                 GradientStop {
                     position: 1
-                    color: "#c65c03"
+                    color: "#000000"
                 }
-                orientation: Gradient.Vertical
+                orientation: Gradient.Horizontal
             }
+            */
 
-            height: parent.height * (currentDraw.level / 40)
+            width: (parent.width - 1) * (batteryGauge.level / 100)
             radius: 7
 
             Behavior on height {
@@ -62,10 +79,10 @@ Item {
 
         Text {
             anchors.centerIn: parent
-            text: (currentDraw.level).toFixed(2) + "A"
+            text: (batteryGauge.level).toFixed(2) + "%"
             color: "white"
             font.pixelSize: 20
-            rotation: 90
+            rotation: 0
             font.bold: true
         }
     }

@@ -12,16 +12,16 @@ import QMLCDash
 
 Item {
     id: root
-    width: 100
-    height: 40
+    width: parent.width * 0.125
+    height: parent.height * 0.1
 
     Button {
-        id: parkButton
+        id: lightsButton
         visible: true
         // Temporary test variable — REMOVE later
-        property bool fakePark: true
+        property bool fakeLights: true
         opacity: 1
-        text: /*dashboardcontroller.park*/ fakePark ? "Park" : "Parked"
+        text: /*dashboardcontroller.Lights*/ fakeLights ? "Lights ON" : "Lights OFF"
         anchors.fill: parent
         rotation: 0
         flat: false
@@ -29,12 +29,12 @@ Item {
         background: Rectangle {
             id: bg
             radius: 10
-            color: fakePark ? "#2ecc71" : "#e74c3c" // green / red
+            color: fakeLights ? "#2ecc71" : "#e74c3c" // green / red
             border.width: 2
             border.color: "#222"
 
             // Press feedback — slightly shrink on touch
-            scale: parkButton.down ? 0.95 : 1.0
+            scale: lightsButton.down ? 0.95 : 1.0
 
             Behavior on scale {
                 NumberAnimation {
@@ -54,7 +54,7 @@ Item {
 
         TapHandler {
             id: tapper
-            onTapped: parkButton.fakePark = !parkButton.fakePark
+            onTapped: lightsButton.fakeLights = !lightsButton.fakeLights
         }
     }
 }

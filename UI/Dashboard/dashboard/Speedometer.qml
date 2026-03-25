@@ -8,25 +8,26 @@ Check out https://doc.qt.io/qtcreator/creator-quick-ui-forms.html for details on
 */
 import QtQuick
 import QtQuick.Controls
+import Qt5Compat.GraphicalEffects
 import QMLCDash
 
 Item {
     id: root
-    width: 350
-    height: 350
+    width: parent.width * 0.38
+    height: width
     property int speed: 0
 
        Connections {
            target: dashboardController
-           onLeftRpmChanged: {
+           function onLeftRpmChanged(rpm){
                root.speed = rpm; // value from MotorDataProcessor via DashboardController
            }
        }
     Rectangle {
         id: speedometer
-        width: 350
-        height: 350
-        radius: 175
+        // scale width/height with window
+        anchors.fill: parent
+        radius: width/2
         gradient: Gradient {
             GradientStop {
                 position: 0
@@ -42,19 +43,33 @@ Item {
 
         Image {
                 id: ramsLogo
-                visible: DashboardController.locked
+                //visible: DashboardController.locked
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
                 source: "../images/CSU-Ram-Rev.png"
                 mipmap: true
-                width: 350
-                height: 350
+                anchors.fill: parent
+
             }
 
+        ColorOverlay {
+                anchors.fill: ramsLogo
+                source: ramsLogo
+                color: "darkgoldenrod" // Change this color dynamically
+            }
+/*
+        Colorize {
+            anchors.fill: ramsLogo
+            source: ramsLogo
+            //hue: 0.9 // Range 0.0 - 1.0
+            saturation: 0.8
+            lightness: 0.0
+        }
+*/
         Text {
             id: speed
-            x: 142
-            y: 142
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: parent.height * 0.4
             width: 67
             color: "#eaeaea"
             //text: qsTr("0")
@@ -65,8 +80,8 @@ Item {
 
         Text {
             id: text1
-            x: 154
-            y: 225
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: parent.height * 0.6
             color: "#eaeaea"
             text: qsTr("rpm")
             font.pixelSize: 24

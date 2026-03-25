@@ -26,18 +26,20 @@ qt_add_qml_module(appQMLCDash
 
         QML_FILES
             UI/Dashboard/App.qml
-            UI/Dashboard/dashboard/BatteryGauge.ui.qml
-            UI/Dashboard/dashboard/CurrentDraw.ui.qml
-            UI/Dashboard/dashboard/Dashboard.ui.qml
-            UI/Dashboard/dashboard/DirectionButton.ui.qml
-            UI/Dashboard/dashboard/Lights.ui.qml
-            UI/Dashboard/dashboard/Lock.ui.qml
-            UI/Dashboard/dashboard/Park.ui.qml
-            UI/Dashboard/dashboard/Settings.ui.qml
-            UI/Dashboard/dashboard/ShutDown.ui.qml
-            UI/Dashboard/dashboard/Speedometer.ui.qml
+            UI/Dashboard/dashboard/BatteryGaugeLeft.qml
+            UI/Dashboard/dashboard/CurrentDrawLeft.qml
+            UI/Dashboard/dashboard/Dashboard.qml
+            UI/Dashboard/dashboard/DirectionButton.qml
+            UI/Dashboard/dashboard/Lights.qml
+            UI/Dashboard/dashboard/Lock.qml
+            UI/Dashboard/dashboard/Park.qml
+            UI/Dashboard/dashboard/Settings.qml
+            UI/Dashboard/dashboard/ShutDown.qml
+            UI/Dashboard/dashboard/Speedometer.qml
 
         RESOURCES UI/Dashboard/images/CSU-Ram-Rev.png
+        QML_FILES UI/Dashboard/dashboard/CurrentDrawRight.qml
+        QML_FILES UI/Dashboard/dashboard/BatteryGaugeRight.qml
 
         #QML_FILES Speedometer.qml
         #QML_FILES Dashboard.qml
