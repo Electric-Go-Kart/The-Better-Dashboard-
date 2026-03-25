@@ -34,6 +34,10 @@ void MotorDataProcessor::updateValues(int rpmRaw, float voltageRaw, float curren
     // Update SOC
     stateOfCharge = computeSOC();
     emit socUpdated(stateOfCharge);
+
+    //compute RPM
+    rpm = rpm/7;
+    emit rpmUpdated(rpm);
 }
 
 float MotorDataProcessor::computeInstantPower(float voltage, float current)
