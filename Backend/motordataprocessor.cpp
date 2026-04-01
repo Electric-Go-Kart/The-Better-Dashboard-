@@ -29,11 +29,14 @@ void MotorDataProcessor::updateValues(int rpmRaw, float voltageRaw, float curren
 
     // Integrate into total energy (Wh)
     integrateEnergy(instantPower, deltaTimeSec);
-    emit powerUpdated(instantPower);
 
     // Update SOC
     stateOfCharge = computeSOC();
     emit socUpdated(stateOfCharge);
+
+    // Match teammate controller scaling expectation for wheel-facing RPM.
+    rpm = rpm / 7;
+    emit rpmUpdated(rpm);
 }
 
 float MotorDataProcessor::computeInstantPower(float voltage, float current)

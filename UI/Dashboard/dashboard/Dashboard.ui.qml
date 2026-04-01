@@ -17,6 +17,13 @@ Item {
     signal settingsRequested()
     property string footerWarning: ""
     property bool footerWarningVisible: false
+    property bool demoSweepEnabled: typeof uiSweepTestEnabled !== "undefined" ? uiSweepTestEnabled : false
+    property real demoSpeedMph: 0
+    property real demoCurrentLeft: 0
+    property real demoCurrentRight: 0
+    property real demoSocLeft: 100
+    property real demoSocRight: 100
+    property real demoPhase: 0
 
     Rectangle {
         anchors.fill: parent
@@ -47,8 +54,12 @@ Item {
             anchors.right: parent.right
             anchors.rightMargin: 12
             anchors.verticalCenter: parent.verticalCenter
-            text: dashboardController.canOnline ? "CAN Online" : "CAN Offline"
-            color: dashboardController.canOnline ? "#87d88d" : "#ff7b7b"
+            text: root.demoSweepEnabled
+                  ? "UI SWEEP TEST"
+                  : (dashboardController.canOnline ? "CAN Online" : "CAN Offline")
+            color: root.demoSweepEnabled
+                   ? "#87d88d"
+                   : (dashboardController.canOnline ? "#87d88d" : "#ff7b7b")
             font.pixelSize: 16
             font.bold: true
         }
@@ -56,57 +67,102 @@ Item {
 
     Speedometer {
         id: speedometer
-        x: 225
-        y: 78
-    }
-
-    DirectionButton {
-        id: directionButton
-        x: 606
-        y: 84
+        x: 238
+        y: 73
+        demoMode: root.demoSweepEnabled
+        demoSpeedMph: root.demoSpeedMph
     }
 
     BatteryGauge {
-        id: batteryGauge
-        x: 743
-        y: 60
+        id: batteryGaugeLeft
+        x: 24
+        y: 66
+        useRightMotor: false
+        demoMode: root.demoSweepEnabled
+        demoLevel: root.demoSocLeft
     }
 
     CurrentDraw {
-        id: currentDraw
-        x: 37
-        y: 60
+        id: currentDrawLeft
+        x: 24
+        y: 116
+        useRightMotor: false
+        demoMode: root.demoSweepEnabled
+        demoLevel: root.demoCurrentLeft
+    }
+
+    BatteryGauge {
+        id: batteryGaugeRight
+        x: 626
+        y: 66
+        useRightMotor: true
+        demoMode: root.demoSweepEnabled
+        demoLevel: root.demoSocRight
+    }
+
+    CurrentDraw {
+        id: currentDrawRight
+        x: 626
+        y: 116
+        useRightMotor: true
+        demoMode: root.demoSweepEnabled
+        demoLevel: root.demoCurrentRight
+    }
+
+    Timer {
+        id: demoSweepTimer
+        running: root.demoSweepEnabled
+        repeat: true
+        interval: 40
+        onTriggered: {
+            root.demoPhase += 0.045
+            root.demoSpeedMph = (Math.sin(root.demoPhase) * 0.5 + 0.5) * 25.0
+            root.demoCurrentLeft = (Math.sin(root.demoPhase * 1.6 + 0.8) * 0.5 + 0.5) * 95.0
+            root.demoCurrentRight = (Math.sin(root.demoPhase * 1.25 + 2.1) * 0.5 + 0.5) * 95.0
+            root.demoSocLeft = (Math.sin(root.demoPhase * 0.35 + 0.4) * 0.5 + 0.5) * 80.0 + 20.0
+            root.demoSocRight = (Math.sin(root.demoPhase * 0.32 + 1.9) * 0.5 + 0.5) * 75.0 + 25.0
+        }
     }
 
     Park {
         id: park
-        x: 606
-        y: 149
+        x: 504
+        y: 414
+        width: 88
+        height: 32
     }
 
     Lights {
         id: lights
-        x: 606
-        y: 214
-    }
-
-    ShutDown {
-        id: shutDown
-        x: 94
-        y: 84
+        x: 652
+        y: 414
+        width: 88
+        height: 32
     }
 
     Settings {
         id: settings
-        x: 94
-        y: 149
+        x: 60
+        y: 414
+        width: 88
+        height: 32
         onSettingsPressed: root.settingsRequested()
     }
 
     Lock {
         id: lock
-        x: 94
-        y: 214
+        x: 208
+        y: 414
+        width: 88
+        height: 32
+    }
+
+    DirectionButton {
+        id: directionButton
+        x: 356
+        y: 414
+        width: 88
+        height: 32
     }
 
     Rectangle {

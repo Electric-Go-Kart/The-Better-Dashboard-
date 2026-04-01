@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QProcessEnvironment>
+#include <QFont>
 
 #include "Backend/dashboardcontroller.h"
 #include "Backend/cancontroller.h"
@@ -11,6 +12,9 @@ int main(int argc, char *argv[])
     qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
 
     QGuiApplication app(argc, argv);
+    QFont dashFont("Noto Sans");
+    dashFont.setStyleHint(QFont::SansSerif);
+    app.setFont(dashFont);
     QQmlApplicationEngine engine;
 
     //---------------------------------------------------
@@ -79,6 +83,9 @@ int main(int argc, char *argv[])
     // 3. Expose dashboardController to QML
     //---------------------------------------------------
     engine.rootContext()->setContextProperty("dashboardController", &dashboardController);
+    engine.rootContext()->setContextProperty("canController", &canController);
+    const bool uiSweepTestEnabled = qEnvironmentVariable("DASH_UI_SWEEP_TEST", "0") == "1";
+    engine.rootContext()->setContextProperty("uiSweepTestEnabled", uiSweepTestEnabled);
 
     //---------------------------------------------------
     // 4. Load QML

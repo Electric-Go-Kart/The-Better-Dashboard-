@@ -18,6 +18,8 @@ class DashboardController : public QObject {
     Q_PROPERTY(QString lastControlError READ lastControlError NOTIFY lastControlErrorChanged)
     Q_PROPERTY(bool settingsAccessAllowed READ settingsAccessAllowed NOTIFY settingsAccessAllowedChanged)
     Q_PROPERTY(QString driveMode READ driveMode NOTIFY driveModeChanged)
+    Q_PROPERTY(QString unitsSystem READ unitsSystem NOTIFY unitsSystemChanged)
+    Q_PROPERTY(double uiBrightness READ uiBrightness NOTIFY uiBrightnessChanged)
 
 public:
     explicit DashboardController(QObject *parent = nullptr);
@@ -31,6 +33,8 @@ public:
     QString lastControlError() const;
     bool settingsAccessAllowed() const;
     QString driveMode() const;
+    QString unitsSystem() const;
+    double uiBrightness() const;
 
 signals:
     // Left Motor UI
@@ -56,6 +60,8 @@ signals:
     void lastControlErrorChanged(const QString &errorMessage);
     void settingsAccessAllowedChanged(bool allowed);
     void driveModeChanged(const QString &mode);
+    void unitsSystemChanged(const QString &units);
+    void uiBrightnessChanged(double brightness);
 
     // Command path into CANController.
     void parkCommandRequested(bool enabled);
@@ -87,6 +93,8 @@ public slots:
     Q_INVOKABLE void toggleLock();
     Q_INVOKABLE void clearFault();
     Q_INVOKABLE void setDriveMode(const QString &mode);
+    Q_INVOKABLE void setUnitsSystem(const QString &units);
+    Q_INVOKABLE void setUiBrightness(double brightness);
 
 private slots:
     void onDriveStateLabelChanged(const QString &stateLabel);
@@ -106,6 +114,8 @@ private:
     bool settingsAllowed = true;
     int settingsRpmThreshold = 120;
     QString selectedDriveMode = "Normal";
+    QString selectedUnitsSystem = "Imperial";
+    double selectedUiBrightness = 0.8;
 };
 
 #endif 

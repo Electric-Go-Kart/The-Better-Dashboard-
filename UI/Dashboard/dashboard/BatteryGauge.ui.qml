@@ -14,14 +14,28 @@ import "Theme.js" as Theme
 
 Item {
     id: batteryGauge
-    width: 20
-    height: 400
+    width: 150
+    height: 42
     property real level: 100   // starts at 100%
+    property bool useRightMotor: false
+    property bool demoMode: false
+    property real demoLevel: 100
+
+    function displayLevel() {
+        return demoMode ? demoLevel : level
+    }
 
         Connections {
             target: dashboardController
             onLeftSocChanged: {
-                batteryGauge.level = soc; // updated directly from MotorDataProcessor via DashboardController
+                if (!batteryGauge.useRightMotor) {
+                    batteryGauge.level = soc;
+                }
+            }
+            onRightSocChanged: {
+                if (batteryGauge.useRightMotor) {
+                    batteryGauge.level = soc;
+                }
             }
         }
 
@@ -46,28 +60,28 @@ Item {
 
         Rectangle {
             id: fillBar
-            x: 0
-            width: 20
+            x: 3
+            height: parent.height - 6
             //height: dashboardcontroller.charge
             //color: "#0f3704"
-            anchors.bottom: parent.bottom
+            anchors.verticalCenter: parent.verticalCenter
             gradient: Gradient {
                 GradientStop {
                     position: 0
-                    color: Theme.csuGreenBright
+                    color: "#4AA3FF"
                 }
 
                 GradientStop {
                     position: 1
-                    color: Theme.panelDark
+                    color: "#1A3F6A"
                 }
-                orientation: Gradient.Vertical
+                orientation: Gradient.Horizontal
             }
 
-            height: (parent.height - 8) * (batteryGauge.level / 100)
+            width: (parent.width - 6) * (Math.min(Math.max(batteryGauge.displayLevel(), 0), 100) / 100)
             radius: 7
 
-            Behavior on height {
+            Behavior on width {
                 NumberAnimation {
                     duration: 300
                     easing.type: Easing.OutQuad
@@ -77,11 +91,12 @@ Item {
 
         Text {
             anchors.centerIn: parent
-            text: batteryGauge.level + "%"
+            text: (batteryGauge.displayLevel()).toFixed(1) + "%"
             color: Theme.textPrimary
-            font.pixelSize: 20
-            rotation: 90
+            font.pixelSize: 16
             font.bold: true
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
         }
     }
 }

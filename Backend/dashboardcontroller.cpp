@@ -64,6 +64,16 @@ QString DashboardController::driveMode() const
     return selectedDriveMode;
 }
 
+QString DashboardController::unitsSystem() const
+{
+    return selectedUnitsSystem;
+}
+
+double DashboardController::uiBrightness() const
+{
+    return selectedUiBrightness;
+}
+
 // LEFT MOTOR ------------------
 
 void DashboardController::updateLeftRpm(int rpm) {
@@ -203,6 +213,28 @@ void DashboardController::setDriveMode(const QString &mode)
     }
     selectedDriveMode = mode;
     emit driveModeChanged(selectedDriveMode);
+}
+
+void DashboardController::setUnitsSystem(const QString &units)
+{
+    if (units != "Imperial" && units != "Metric") {
+        return;
+    }
+    if (selectedUnitsSystem == units) {
+        return;
+    }
+    selectedUnitsSystem = units;
+    emit unitsSystemChanged(selectedUnitsSystem);
+}
+
+void DashboardController::setUiBrightness(double brightness)
+{
+    const double clamped = qBound(0.2, brightness, 1.0);
+    if (qFuzzyCompare(selectedUiBrightness, clamped)) {
+        return;
+    }
+    selectedUiBrightness = clamped;
+    emit uiBrightnessChanged(selectedUiBrightness);
 }
 
 void DashboardController::onDriveStateLabelChanged(const QString &stateLabel)

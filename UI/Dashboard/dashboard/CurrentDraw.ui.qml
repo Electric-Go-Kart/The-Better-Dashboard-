@@ -13,14 +13,28 @@ import "Theme.js" as Theme
 
 Item {
     id: currentDraw
-    width: 20
-    height: 400
+    width: 150
+    height: 42
     property real level: 0   // starts at 100%
+    property bool useRightMotor: false
+    property bool demoMode: false
+    property real demoLevel: 0
+
+    function displayLevel() {
+        return demoMode ? demoLevel : level
+    }
 
         Connections {
             target: dashboardController
             onLeftCurrentChanged: {
-                currentDraw.level = current; // updated directly from MotorDataProcessor via DashboardController
+                if (!currentDraw.useRightMotor) {
+                    currentDraw.level = current;
+                }
+            }
+            onRightCurrentChanged: {
+                if (currentDraw.useRightMotor) {
+                    currentDraw.level = current;
+                }
             }
         }
 
@@ -35,10 +49,11 @@ Item {
         Rectangle {
             id: fillBar
             x: 0
-            width: 20
+            height: parent.height
             //height: dashboardcontroller.charge
             //color: "#0f3704"
-            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
             gradient: Gradient {
                 GradientStop {
                     position: 0
@@ -46,16 +61,26 @@ Item {
                 }
 
                 GradientStop {
-                    position: 1
-                    color: "#A15A1D"
+                    position: 0.72
+                    color: "#C87726"
                 }
-                orientation: Gradient.Vertical
+
+                GradientStop {
+                    position: 0.9
+                    color: "#8A4618"
+                }
+
+                GradientStop {
+                    position: 1
+                    color: "#5C2A0E"
+                }
+                orientation: Gradient.Horizontal
             }
 
-            height: parent.height * (currentDraw.level / 40)
+            width: (parent.width - 6) * (Math.min(Math.max(currentDraw.displayLevel(), 0), 100) / 100)
             radius: 7
 
-            Behavior on height {
+            Behavior on width {
                 NumberAnimation {
                     duration: 300
                     easing.type: Easing.OutQuad
@@ -65,10 +90,9 @@ Item {
 
         Text {
             anchors.centerIn: parent
-            text: currentDraw.level + "A"
+            text: (currentDraw.displayLevel()).toFixed(1) + "A"
             color: Theme.textPrimary
-            font.pixelSize: 20
-            rotation: 90
+            font.pixelSize: 18
             font.bold: true
         }
     }

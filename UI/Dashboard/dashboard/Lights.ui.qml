@@ -21,11 +21,19 @@ Item {
         id: lightsButton
         visible: true
         opacity: 1
-        text: root.lightsEnabled ? "Lights ON" : "Lights OFF"
+        text: "Lights"
         anchors.fill: parent
         rotation: 0
         flat: false
         onClicked: dashboardController.toggleLights()
+        contentItem: Text {
+            text: lightsButton.text
+            color: "#F3F7F2"
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            font.pixelSize: 16
+            font.bold: true
+        }
 
         background: Rectangle {
             id: bg

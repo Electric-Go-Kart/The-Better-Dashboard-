@@ -26,6 +26,14 @@ Item {
         rotation: 0
         flat: false
         onClicked: dashboardController.toggleLock()
+        contentItem: Text {
+            text: lockButton.text
+            color: "#F3F7F2"
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            font.pixelSize: 16
+            font.bold: true
+        }
 
         background: Rectangle {
             id: bg

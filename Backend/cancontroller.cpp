@@ -5,11 +5,23 @@
 #include <QProcessEnvironment>
 #include <QTimer>
 #include <QRandomGenerator>
+#include <QProcess>
+#include <QStringList>
 
 namespace {
 quint32 makeVescFrameId(quint32 packetId, int controllerId)
 {
     return ((packetId & 0xFFU) << 8U) | static_cast<quint32>(controllerId & 0xFF);
+}
+
+quint32 vescPacketId(quint32 frameId)
+{
+    return (frameId >> 8U) & 0xFFU;
+}
+
+int vescControllerId(quint32 frameId)
+{
+    return static_cast<int>(frameId & 0xFFU);
 }
 }
 
@@ -73,6 +85,14 @@ bool CANController::initialize(const QString &interfaceName, bool testMode)
     if (ok && envBrake > 0.0f) {
         parkBrakeCurrentA = envBrake;
     }
+    canBitrate = qEnvironmentVariableIntValue("DASH_CAN_BITRATE");
+    if (canBitrate <= 0) {
+        canBitrate = 500000;
+    }
+    reverseGpioPin = qEnvironmentVariableIntValue("DASH_REVERSE_GPIO_PIN");
+    if (reverseGpioPin <= 0) {
+        reverseGpioPin = 26;
+    }
 
     if (device) {
         device->disconnectDevice();
@@ -91,6 +111,9 @@ bool CANController::initialize(const QString &interfaceName, bool testMode)
 
     device->setConfigurationParameter(QCanBusDevice::ReceiveOwnKey, testModeEnabled);
     device->setConfigurationParameter(QCanBusDevice::LoopbackKey, testModeEnabled);
+    if (!testModeEnabled) {
+        device->setConfigurationParameter(QCanBusDevice::BitRateKey, canBitrate);
+    }
 
     connect(device, &QCanBusDevice::framesReceived, this, &CANController::processIncomingFrame);
     connect(device, &QCanBusDevice::errorOccurred, this, &CANController::handleCanError);
@@ -101,6 +124,16 @@ bool CANController::initialize(const QString &interfaceName, bool testMode)
         reconnectTimer.start();
     }
     return connected;
+}
+
+bool CANController::debugFramesEnabled() const
+{
+    return debugFrames;
+}
+
+QString CANController::debugFrameLog() const
+{
+    return debugFrameLines.join('\n');
 }
 
 bool CANController::connectDevice()
@@ -147,27 +180,42 @@ void CANController::processIncomingFrame()
         const QCanBusFrame frame = device->readFrame();
         const quint32 id = frame.frameId();
         const QByteArray data = frame.payload();
+        if (debugFrames) {
+            appendDebugFrame(id, data);
+        }
         if (data.size() < 8) {
             qWarning() << "Skipping short CAN frame id" << Qt::hex << id << "dlc" << data.size();
             continue;
         }
-
-        if (id == LEFT_MOTOR_FRAME_ID) {
-            const int rpm = decodeRpm(data);
-            const float current = decodeCurrent(data);
-            const float voltage = decodeVoltage(data);
-
-            leftMotor.updateValues(rpm, voltage, current, deltaTime);
-        }
-
-        else if (id == RIGHT_MOTOR_FRAME_ID) {
-            const int rpm = decodeRpm(data);
-            const float current = decodeCurrent(data);
-            const float voltage = decodeVoltage(data);
-
-            rightMotor.updateValues(rpm, voltage, current, deltaTime);
-        }
+        processVescStatusFrame(id, data);
     }
+}
+
+bool CANController::processVescStatusFrame(quint32 frameId, const QByteArray &payload)
+{
+    MotorDataProcessor *targetMotor = nullptr;
+    const quint32 packetId = vescPacketId(frameId);
+    const int controllerId = vescControllerId(frameId);
+
+    if (frameId == LEGACY_LEFT_MOTOR_FRAME_ID) {
+        targetMotor = &leftMotor;
+    } else if (frameId == LEGACY_RIGHT_MOTOR_FRAME_ID) {
+        targetMotor = &rightMotor;
+    } else if (packetId == CAN_PACKET_STATUS && controllerId == leftControllerId) {
+        targetMotor = &leftMotor;
+    } else if (packetId == CAN_PACKET_STATUS && controllerId == rightControllerId) {
+        targetMotor = &rightMotor;
+    }
+
+    if (!targetMotor) {
+        return false;
+    }
+
+    const int rpm = decodeRpm(payload);
+    const float current = decodeCurrent(payload);
+    const float voltage = decodeVoltage(payload);
+    targetMotor->updateValues(rpm, voltage, current, deltaTime);
+    return true;
 }
 
 // ---------------- DECODING FUNCTIONS ------------------
@@ -222,25 +270,35 @@ void CANController::generateFakeCanData()
     if (device->state() != QCanBusDevice::ConnectedState)
         return;
 
-    const int rpm = QRandomGenerator::global()->bounded(900, 3000);
-    const int currentDeciAmp = QRandomGenerator::global()->bounded(20, 120);
-    const int voltageDeciVolt = QRandomGenerator::global()->bounded(450, 560);
-    QByteArray payload(8, 0x00);
-    payload[0] = static_cast<char>((rpm >> 24) & 0xFF);
-    payload[1] = static_cast<char>((rpm >> 16) & 0xFF);
-    payload[2] = static_cast<char>((rpm >> 8) & 0xFF);
-    payload[3] = static_cast<char>(rpm & 0xFF);
-    payload[4] = static_cast<char>((currentDeciAmp >> 8) & 0xFF);
-    payload[5] = static_cast<char>(currentDeciAmp & 0xFF);
-    payload[6] = static_cast<char>((voltageDeciVolt >> 8) & 0xFF);
-    payload[7] = static_cast<char>(voltageDeciVolt & 0xFF);
+    auto makeStatusPayload = [](int rpm, int currentDeciAmp, int voltageDeciVolt) {
+        QByteArray payload(8, 0x00);
+        payload[0] = static_cast<char>((rpm >> 24) & 0xFF);
+        payload[1] = static_cast<char>((rpm >> 16) & 0xFF);
+        payload[2] = static_cast<char>((rpm >> 8) & 0xFF);
+        payload[3] = static_cast<char>(rpm & 0xFF);
+        payload[4] = static_cast<char>((currentDeciAmp >> 8) & 0xFF);
+        payload[5] = static_cast<char>(currentDeciAmp & 0xFF);
+        payload[6] = static_cast<char>((voltageDeciVolt >> 8) & 0xFF);
+        payload[7] = static_cast<char>(voltageDeciVolt & 0xFF);
+        return payload;
+    };
 
-    QCanBusFrame frame(
-        LEFT_MOTOR_FRAME_ID,
-        payload);
+    const QByteArray leftPayload = makeStatusPayload(
+        QRandomGenerator::global()->bounded(900, 3000),
+        QRandomGenerator::global()->bounded(20, 120),
+        QRandomGenerator::global()->bounded(450, 560));
+    const QByteArray rightPayload = makeStatusPayload(
+        QRandomGenerator::global()->bounded(850, 2850),
+        QRandomGenerator::global()->bounded(18, 110),
+        QRandomGenerator::global()->bounded(445, 555));
 
-    frame.setExtendedFrameFormat(true);
-    device->writeFrame(frame);
+    QCanBusFrame leftFrame(makeVescFrameId(CAN_PACKET_STATUS, leftControllerId), leftPayload);
+    leftFrame.setExtendedFrameFormat(true);
+    device->writeFrame(leftFrame);
+
+    QCanBusFrame rightFrame(makeVescFrameId(CAN_PACKET_STATUS, rightControllerId), rightPayload);
+    rightFrame.setExtendedFrameFormat(true);
+    device->writeFrame(rightFrame);
 }
 
 void CANController::handleCanError(QCanBusDevice::CanBusError error)
@@ -284,6 +342,18 @@ void CANController::setParkEnabled(bool enabled)
 void CANController::setReverseEnabled(bool enabled)
 {
     reverseEnabled = enabled;
+    directionState = reverseEnabled ? "reverse" : "forward";
+    if (!testModeEnabled && !lockEnabled) {
+        const QString gpioValue = reverseEnabled ? "0" : "1";
+        const QStringList args = {
+            QString("gpiochip0"),
+            QString("%1=%2").arg(reverseGpioPin).arg(gpioValue)
+        };
+        const int result = QProcess::execute("gpioset", args);
+        if (result != 0) {
+            emit canError(QString("gpioset failed for direction pin %1").arg(reverseGpioPin));
+        }
+    }
     sendDriveModeFrame();
 }
 
@@ -296,7 +366,31 @@ void CANController::setLightsEnabled(bool enabled)
 void CANController::setLockEnabled(bool enabled)
 {
     lockEnabled = enabled;
+    if (lockEnabled) {
+        directionState = "forward";
+    }
     sendDriveModeFrame();
+}
+
+void CANController::setDebugFramesEnabled(bool enabled)
+{
+    if (debugFrames == enabled) {
+        return;
+    }
+    debugFrames = enabled;
+    emit debugFramesEnabledChanged(debugFrames);
+    if (!debugFrames) {
+        clearDebugFrameLog();
+    }
+}
+
+void CANController::clearDebugFrameLog()
+{
+    if (debugFrameLines.isEmpty()) {
+        return;
+    }
+    debugFrameLines.clear();
+    emit debugFrameLogChanged(QString());
 }
 
 void CANController::sendParkHeartbeat()
@@ -355,9 +449,25 @@ void CANController::sendDriveModeFrame()
     payload[2] = static_cast<char>(lockEnabled ? 1 : 0);
     payload[3] = static_cast<char>(lightsEnabled ? 1 : 0);
     writeFrame(makeVescFrameId(APP_MODE_PACKET_ID, leftControllerId), payload, true);
+    writeFrame(makeVescFrameId(APP_MODE_PACKET_ID, rightControllerId), payload, true);
 }
 
 float CANController::activeBrakeCurrentA() const
 {
     return parkBrakeCurrentA;
+}
+
+void CANController::appendDebugFrame(quint32 frameId, const QByteArray &payload, const QString &note)
+{
+    QString line = QString("0x%1  [%2]")
+            .arg(QString::number(frameId, 16).toUpper())
+            .arg(QString::fromLatin1(payload.toHex(' ')).toUpper());
+    if (!note.isEmpty()) {
+        line += "  " + note;
+    }
+    debugFrameLines.append(line);
+    while (debugFrameLines.size() > maxDebugFrameLines) {
+        debugFrameLines.removeFirst();
+    }
+    emit debugFrameLogChanged(debugFrameLines.join('\n'));
 }

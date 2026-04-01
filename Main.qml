@@ -23,6 +23,20 @@ Window {
         initialItem: dashboardPageComponent
     }
 
+    Rectangle {
+        anchors.fill: parent
+        color: "#000000"
+        opacity: (1.0 - dashboardController.uiBrightness) * 0.75
+        z: 98
+        visible: opacity > 0.001
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 140
+                easing.type: Easing.OutQuad
+            }
+        }
+    }
+
     Component {
         id: dashboardPageComponent
         App {
