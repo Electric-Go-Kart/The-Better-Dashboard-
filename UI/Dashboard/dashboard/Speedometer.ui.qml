@@ -16,6 +16,7 @@ Item {
     id: root
     width: 325
     height: 325
+    signal logoPressed()
     property real speedMph: 0
     property bool demoMode: false
     property real demoSpeedMph: 0
@@ -109,6 +110,13 @@ Item {
             source: ramsLogoSource
             color: "#B7C8BE"
             opacity: dashboardController.lockEnabled ? 0.62 : 0.4
+        }
+
+        MouseArea {
+            anchors.centerIn: ramsLogo
+            width: 184
+            height: 184
+            onClicked: root.logoPressed()
         }
 
         Repeater {

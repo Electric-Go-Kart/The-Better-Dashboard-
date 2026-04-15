@@ -28,6 +28,7 @@ qt_add_qml_module(appQMLCDash
         QML_FILES
             UI/Dashboard/App.qml
             UI/Dashboard/SettingsPage.qml
+            UI/Dashboard/VehicleExplorerPage.qml
             UI/Dashboard/dashboard/BatteryGauge.ui.qml
             UI/Dashboard/dashboard/CurrentDraw.ui.qml
             UI/Dashboard/dashboard/Dashboard.ui.qml

@@ -15,6 +15,7 @@ Item {
     width: 800
     height: 480
     signal settingsRequested()
+    signal vehicleExplorerRequested()
     property string footerWarning: ""
     property bool footerWarningVisible: false
     property bool demoSweepEnabled: typeof uiSweepTestEnabled !== "undefined" ? uiSweepTestEnabled : false
@@ -71,6 +72,7 @@ Item {
         y: 73
         demoMode: root.demoSweepEnabled
         demoSpeedMph: root.demoSpeedMph
+        onLogoPressed: root.vehicleExplorerRequested()
     }
 
     BatteryGauge {

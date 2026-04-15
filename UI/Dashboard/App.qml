@@ -35,6 +35,16 @@ Item {
                 transientMessageTimer.restart()
             }
         }
+        onVehicleExplorerRequested: {
+            const navStack = StackView.view ? StackView.view : root.stackView
+            if (navStack) {
+                navStack.push("VehicleExplorerPage.qml")
+            } else {
+                root.transientMessage = "Navigation unavailable"
+                root.transientVisible = true
+                transientMessageTimer.restart()
+            }
+        }
     }
 
     Rectangle {
