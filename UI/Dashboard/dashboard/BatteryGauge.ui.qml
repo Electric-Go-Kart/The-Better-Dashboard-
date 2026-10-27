@@ -27,12 +27,12 @@ Item {
 
         Connections {
             target: dashboardController
-            onLeftSocChanged: {
+            function onLeftSocChanged(soc) {
                 if (!batteryGauge.useRightMotor) {
                     batteryGauge.level = soc;
                 }
             }
-            onRightSocChanged: {
+            function onRightSocChanged(soc) {
                 if (batteryGauge.useRightMotor) {
                     batteryGauge.level = soc;
                 }

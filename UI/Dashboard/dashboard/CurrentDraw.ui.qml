@@ -26,12 +26,12 @@ Item {
 
         Connections {
             target: dashboardController
-            onLeftCurrentChanged: {
+            function onLeftCurrentChanged(current) {
                 if (!currentDraw.useRightMotor) {
                     currentDraw.level = current;
                 }
             }
-            onRightCurrentChanged: {
+            function onRightCurrentChanged(current) {
                 if (currentDraw.useRightMotor) {
                     currentDraw.level = current;
                 }

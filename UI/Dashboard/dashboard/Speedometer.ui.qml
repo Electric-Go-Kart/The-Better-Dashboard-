@@ -67,7 +67,7 @@ Item {
 
        Connections {
            target: dashboardController
-           onLeftRpmChanged: {
+           function onLeftRpmChanged(rpm) {
                const wheelRpm = rpm * (root.motorGearTeeth / root.wheelGearTeeth)
                const wheelCircumferenceInches = Math.PI * root.wheelDiameterInches
                root.speedMph = (wheelRpm * wheelCircumferenceInches * 60.0) / 63360.0
