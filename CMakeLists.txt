@@ -4,7 +4,7 @@ project(QMLCDash VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick SerialBus)
+find_package(Qt6 REQUIRED COMPONENTS Quick SerialBus SerialPort Network)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -21,6 +21,11 @@ qt_add_qml_module(appQMLCDash
         SOURCES
             test.h test.cpp
             Backend/cancontroller.h Backend/cancontroller.cpp
+            Backend/camerafeed.h Backend/camerafeed.cpp
+            Backend/lidarfeed.h Backend/lidarfeed.cpp
+            Backend/stl27lreader.h Backend/stl27lreader.cpp
+            Backend/detectionmodel.h Backend/detectionmodel.cpp
+            Backend/detectionfeed.h Backend/detectionfeed.cpp
             Backend/dashboardcontroller.h Backend/dashboardcontroller.cpp
             Backend/drivestatemanager.h Backend/drivestatemanager.cpp
             Backend/motordataprocessor.h Backend/motordataprocessor.cpp
@@ -29,6 +34,8 @@ qt_add_qml_module(appQMLCDash
             UI/Dashboard/App.qml
             UI/Dashboard/SettingsPage.qml
             UI/Dashboard/VehicleExplorerPage.qml
+            UI/Dashboard/WhatTheKartSeesPage.qml
+            UI/Dashboard/DetectionIcon.qml
             UI/Dashboard/dashboard/BatteryGauge.ui.qml
             UI/Dashboard/dashboard/CurrentDraw.ui.qml
             UI/Dashboard/dashboard/Dashboard.ui.qml
@@ -42,6 +49,7 @@ qt_add_qml_module(appQMLCDash
 
         RESOURCES UI/Dashboard/images/CSU-Ram-Rev.png
                   UI/Dashboard/dashboard/Theme.js
+                  UI/Dashboard/dashboard/KartGeometry.js
 
         #QML_FILES Speedometer.qml
         #QML_FILES Dashboard.qml
@@ -62,7 +70,7 @@ set_target_properties(appQMLCDash PROPERTIES
 )
 
 target_link_libraries(appQMLCDash
-    PRIVATE Qt6::Quick Qt${QT_VERSION_MAJOR}::SerialBus
+    PRIVATE Qt6::Quick Qt${QT_VERSION_MAJOR}::SerialBus Qt6::Network Qt6::SerialPort
 )
 
 include(GNUInstallDirs)

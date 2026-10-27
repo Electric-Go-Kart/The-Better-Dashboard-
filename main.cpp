@@ -6,6 +6,11 @@
 
 #include "Backend/dashboardcontroller.h"
 #include "Backend/cancontroller.h"
+#include "Backend/camerafeed.h"
+#include "Backend/lidarfeed.h"
+#include "Backend/stl27lreader.h"
+#include "Backend/detectionmodel.h"
+#include "Backend/detectionfeed.h"
 
 int main(int argc, char *argv[])
 {
@@ -86,6 +91,38 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("canController", &canController);
     const bool uiSweepTestEnabled = qEnvironmentVariable("DASH_UI_SWEEP_TEST", "0") == "1";
     engine.rootContext()->setContextProperty("uiSweepTestEnabled", uiSweepTestEnabled);
+
+    CameraFeed cameraFeed;
+    cameraFeed.listen(qEnvironmentVariableIntValue("DASH_CAMERA_PORT") > 0
+                          ? quint16(qEnvironmentVariableIntValue("DASH_CAMERA_PORT"))
+                          : quint16(5600));
+    engine.addImageProvider("kartcam", new CameraImageProvider(cameraFeed.store()));
+    engine.rootContext()->setContextProperty("cameraFeed", &cameraFeed);
+
+    LidarFeed lidarFeed;
+    lidarFeed.listen(qEnvironmentVariableIntValue("DASH_LIDAR_PORT") > 0
+                         ? quint16(qEnvironmentVariableIntValue("DASH_LIDAR_PORT"))
+                         : quint16(5601));
+    engine.rootContext()->setContextProperty("lidarFeed", &lidarFeed);
+
+    // DASH_LIDAR_SOURCE=serial reads a real STL-27L; the default is the CARLA UDP feed.
+    Stl27lReader stl27l;
+    if (qEnvironmentVariable("DASH_LIDAR_SOURCE") == "serial") {
+        stl27l.setMountYawDeg(qEnvironmentVariable("DASH_LIDAR_YAW", "0").toDouble());
+        stl27l.setMirrored(qEnvironmentVariable("DASH_LIDAR_MIRRORED", "0") == "1");
+        QObject::connect(&stl27l, &Stl27lReader::scanReady, &lidarFeed, &LidarFeed::setScan);
+        stl27l.open(qEnvironmentVariable("DASH_LIDAR_DEVICE", "/dev/ttyUSB0"),
+                    qEnvironmentVariable("DASH_LIDAR_BAUD", "921600").toInt());
+    }
+
+    DetectionModel detectionModel;
+    detectionModel.setDemo(qEnvironmentVariable("DASH_BEV_DEMO", "0") == "1");
+    engine.rootContext()->setContextProperty("detectionModel", &detectionModel);
+
+    DetectionFeed detectionFeed(&detectionModel);
+    detectionFeed.listen(qEnvironmentVariableIntValue("DASH_DETECTION_PORT") > 0
+                             ? quint16(qEnvironmentVariableIntValue("DASH_DETECTION_PORT"))
+                             : quint16(5602));
 
     //---------------------------------------------------
     // 4. Load QML

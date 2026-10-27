@@ -24,6 +24,13 @@ Item {
         }
     }
 
+    function openKartSees() {
+        const stack = root.navStack ? root.navStack : StackView.view
+        if (stack) {
+            stack.push("WhatTheKartSeesPage.qml")
+        }
+    }
+
     Component.onCompleted: {
         root.navStack = StackView.view
     }
@@ -284,24 +291,47 @@ Item {
                 height: 8
             }
 
-            Button {
-                text: "Return To Main Dash"
-                width: 280
-                height: 58
-                onClicked: root.returnToMainDash()
-                background: Rectangle {
-                    radius: 10
-                    color: Theme.csuGreen
-                    border.width: 2
-                    border.color: Theme.csuGold
+            Row {
+                spacing: 16
+                Button {
+                    text: "Return To Main Dash"
+                    width: 280
+                    height: 58
+                    onClicked: root.returnToMainDash()
+                    background: Rectangle {
+                        radius: 10
+                        color: Theme.csuGreen
+                        border.width: 2
+                        border.color: Theme.csuGold
+                    }
+                    contentItem: Text {
+                        text: parent.text
+                        color: Theme.textPrimary
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.pixelSize: 22
+                        font.bold: true
+                    }
                 }
-                contentItem: Text {
-                    text: parent.text
-                    color: Theme.textPrimary
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    font.pixelSize: 22
-                    font.bold: true
+                Button {
+                    text: "What The Kart Sees"
+                    width: 280
+                    height: 58
+                    onClicked: root.openKartSees()
+                    background: Rectangle {
+                        radius: 10
+                        color: Theme.csuGreen
+                        border.width: 2
+                        border.color: Theme.csuGold
+                    }
+                    contentItem: Text {
+                        text: parent.text
+                        color: Theme.textPrimary
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.pixelSize: 22
+                        font.bold: true
+                    }
                 }
             }
         }
