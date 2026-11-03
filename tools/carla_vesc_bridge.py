@@ -114,10 +114,14 @@ class CameraStreamer:
         self.last_sent = now
         from PIL import Image
         buf = io.BytesIO()
-        Image.fromarray(rgb).save(buf, format="JPEG", quality=self.quality)
-        data = buf.getvalue()
-        if len(data) < 65000:
-            self.sock.sendto(data, self.addr)
+        img = Image.fromarray(rgb)
+        for q in range(self.quality, 19, -10):  # busy scenes exceed one UDP datagram: lower the quality until it fits
+            buf = io.BytesIO()
+            img.save(buf, format="JPEG", quality=q)
+            data = buf.getvalue()
+            if len(data) < 65000:
+                self.sock.sendto(data, self.addr)
+                return
 
     def on_carla_image(self, image):
         import numpy as np
@@ -167,6 +171,11 @@ def attach_lidar(world, vehicle, streamer, x, z, lidar_range, pps, hz):
     bp.set_attribute("rotation_frequency", str(hz))
     bp.set_attribute("upper_fov", "0")
     bp.set_attribute("lower_fov", "0")
+    # CARLA drops ~45% of points by default; the STL-27L does not, so start from a clean scan.
+    for name, value in (("dropoff_general_rate", "0.0"), ("dropoff_intensity_limit", "1.0"),
+                        ("dropoff_zero_intensity", "0.0"), ("noise_stddev", "0.0")):
+        if bp.has_attribute(name):
+            bp.set_attribute(name, value)
     lidar = world.spawn_actor(bp, carla.Transform(carla.Location(x=x, z=z)), attach_to=vehicle)
     lidar.listen(streamer.on_carla_scan)
     return lidar
@@ -322,6 +331,22 @@ class DetectionStreamer:
         self.sock.sendto(json.dumps({"objects": objects}).encode(), self.addr)
 
 
+class OdomStreamer:
+    """Left/right wheel speeds (m/s, same values as the VESC frames) as JSON datagrams, with optional noise."""
+
+    def __init__(self, host, port, wheel_radius_m, noise_ms):
+        self.addr = (host, port)
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.k = 2 * math.pi * wheel_radius_m / 60.0
+        self.noise = noise_ms
+
+    def send(self, l_rpm, r_rpm):
+        import random
+        vl = l_rpm * self.k + random.gauss(0.0, self.noise)
+        vr = r_rpm * self.k + random.gauss(0.0, self.noise)
+        self.sock.sendto(json.dumps({"t": time.time(), "vl": vl, "vr": vr}).encode(), self.addr)
+
+
 def mock_camera_frame(t, width, height):
     import numpy as np
     img = np.zeros((height, width, 3), dtype=np.uint8)
@@ -421,6 +446,9 @@ def main():
     ap.add_argument("--det-hz", type=float, default=25.0)
     ap.add_argument("--det-range", type=float, default=20.0, help="m")
     ap.add_argument("--det-fov", type=float, default=160.0, help="combined camera FOV in degrees; objects outside become 'unknown'")
+    ap.add_argument("--odom-port", type=int, default=5603, help="UDP port for left/right wheel speeds (0 = off)")
+    ap.add_argument("--odom-hz", type=float, default=50.0)
+    ap.add_argument("--odom-noise", type=float, default=0.02, help="wheel speed noise, m/s (1 sigma)")
     ap.add_argument("--cam-host", default="127.0.0.1", help="dashboard UDP host")
     ap.add_argument("--cam-port", type=int, default=5600, help="matches DASH_CAMERA_PORT")
     ap.add_argument("--cam-width", type=int, default=320)
@@ -466,12 +494,13 @@ def main():
 
     det_streamer = None if args.no_detections else DetectionStreamer(args.cam_host, args.det_port)
     world_ref = None if args.mock else world
+    odom_streamer = OdomStreamer(args.cam_host, args.odom_port, args.wheel_radius, args.odom_noise) if args.odom_port else None
 
     period = 1.0 / args.hz
     t0 = nxt = time.time()
     print(f"Sending VESC status frames on {args.iface} (left={args.left_id}, right={args.right_id}) at {args.hz} Hz")
     try:
-        run_loop(args, bus, left, right, pack, vehicle, streamer, lidar_streamer, det_streamer, world_ref, period, t0, nxt)
+        run_loop(args, bus, left, right, pack, vehicle, streamer, lidar_streamer, det_streamer, world_ref, period, t0, nxt, odom_streamer)
     finally:
         for actor in spawned:
             if actor.type_id == "controller.ai.walker":
@@ -483,7 +512,8 @@ def main():
                 sensor.destroy()
 
 
-def run_loop(args, bus, left, right, pack, vehicle, streamer, lidar_streamer, det_streamer, world, period, t0, nxt):
+def run_loop(args, bus, left, right, pack, vehicle, streamer, lidar_streamer, det_streamer, world, period, t0, nxt, odom_streamer=None):
+    last_odom = 0.0
     last_scan = 0.0
     last_det = 0.0
     last_report = 0.0
@@ -510,6 +540,10 @@ def run_loop(args, bus, left, right, pack, vehicle, streamer, lidar_streamer, de
             l_rpm, r_rpm, speed, thr, brk = mock_state(time.time() - t0, args.wheel_radius)
         else:
             l_rpm, r_rpm, speed, thr, brk = read_carla(vehicle, args.track, args.wheel_radius)
+
+        if odom_streamer is not None and time.time() - last_odom >= 1.0 / args.odom_hz:
+            last_odom = time.time()
+            odom_streamer.send(l_rpm, r_rpm)
 
         base = motor_current(thr, brk, speed, args.max_current)
         skew = 0.05 * (l_rpm - r_rpm) / max(abs(l_rpm) + abs(r_rpm), 1.0)

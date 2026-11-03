@@ -151,3 +151,67 @@ Notes and caveats:
 - The NCNN TwinLiteNet path assumes two outputs of 2-channel logits (class 1 = drivable / lane). **Untested.** The torch TwinLiteNet path runs but its masks have not been checked on road images.
 - The torch run assumes the plain FP32 TwinLiteNet. A Nano or QAT checkpoint needs its own model class.
 - CARLA's rendering is a poor stand-in for a real camera. Use it to catch plumbing errors (colour order, scaling, class mapping, mask orientation, INT8 vs FP32 drift), not to judge accuracy.
+
+## Lidar harness (real STL-27L parser + lidar pipeline on CARLA scans)
+
+[lidar_harness.py](./lidar_harness.py) drives the production lidar code from the CARLA bridge and shows what it detects.
+It does not touch the dash. Data path:
+
+```
+CARLA scan (UDP 5601)  or  --synthetic scene
+   -> accumulate to full 2160-ray revolution, add range noise, apply 0.03-25 m limits
+   -> encode as real 47-byte STL-27L packets (CRC8)
+   -> lidarHarnessCli (C++): Backend/stl27lreader.cpp (framing, CRC, angles, mount yaw/mirror, masks)
+                             Backend/lidarpipeline.cpp (20 m mask, body mask, clustering, 3-of-5 persistence, Kalman tracker)
+   -> JSON per revolution -> OpenCV top-down view + score against bridge ground truth (UDP 5602)
+```
+
+Build the C++ driver once (needs Qt Core + SerialPort only, not the whole dash):
+
+```bash
+cmake -S tools -B build/lidar_harness -G Ninja -DCMAKE_PREFIX_PATH=$HOME/Qt/6.x.y/gcc_64
+cmake --build build/lidar_harness      # if the compiler fails with missing std headers, add -j1
+```
+
+Run (python env needs numpy and opencv-python, e.g. `.venv-ml`):
+
+```bash
+python lidar_harness.py --synthetic                          # no CARLA: moving person, cars, pole, cone, wall
+python lidar_harness.py                                      # live: bridge running with its lidar + detection streams
+python lidar_harness.py --synthetic --no-display --score     # headless, exit code 1 if thresholds fail
+```
+
+- Live mode binds UDP 5601 (scans) and 5602 (ground truth), shared with the dash. Close the dash or move the bridge
+  to other ports (`--lidar-port`, `--det-port` on both sides).
+- Kart body rectangle comes from `UI/Dashboard/dashboard/KartGeometry.js`. Sensor-angle self-hit wedges: `--mask FROM,TO` (repeatable).
+- `--mount-yaw DEG` and `--mirrored` are applied in both the encoder and the C++ reader, so non-default values must give identical results.
+- Sensor model: `--noise` (m, default 0.015), `--min-m`, `--max-m`, `--dropout`; `--corrupt P` drops/bit-flips a fraction of packets to exercise the CRC and resync path.
+- Pipeline tuning without rebuilding: `--set gateM=2 --set persistHits=2` (see `LidarPipeline::Params`).
+- Colours: green T = confirmed track (arrow = velocity above 0.3 m/s), red T = false positive, circle/box = ground truth (red = missed), blue box = cluster. Keys: `q` quit, space pause, `s` save PNG.
+- Score: precision, recall, position error, velocity error, ID switches, detection latency. A track matches a ground-truth object within `--gate` plus the object's half-size. Objects are only "missed" after `--grace` scans.
+
+Camera fusion (spec §4.5 steps 3-4):
+- `--boxes gt|yolo|none`. `gt` projects ground truth into the cameras (test this first), `yolo` runs `ml_camera_harness.py` models on UDP 5600 frames (single camera only, so use `--cam-layout single`), `none` is lidar only.
+- `--cam-layout dual` (default) is two cameras at yaw ∓FOV/2 (left is negative, clockwise-positive) with edges meeting at 0°. Set `--cam-fov` (70.4) and `--cam-width` (640) to match the bridge.
+- Each box becomes a bearing wedge (same-class boxes cut at the seam are merged). Match = angular IoU × sqrt(cluster-extent prior × box-width prior); greedy one-to-one, thresholds `minOverlap`, `minMatch` via `--set`.
+- Track class is sticky: votes change only when a box matches, so the class survives leaving camera view. Classes: person, bike, vehicle, pole/barrier; cones map to pole/barrier (YOLO has no cone class).
+- Size priors are first guesses (`kPriors` in `lidarpipeline.cpp`).
+- Extra metrics: class_coverage, class_accuracy, fused_rate. `--min-class-acc` / `--min-class-cov` set thresholds for `--score` with `--boxes gt`.
+- Box error injection for stress tests: `--box-miss`, `--box-confuse`, `--box-jitter`.
+- The CLI reads framed stdin (1 type byte + u32 LE length + payload): type 0 = raw STL-27L bytes, type 1 = JSON boxes `{"scan":N,"boxes":[{cam,u0,u1,cls,conf}]}`.
+- Not built: homography range fallback for boxes with no cluster, §4.6 smoothing, ego-motion compensation.
+
+Caveats:
+- `Backend/lidarpipeline.*` is new and not yet wired into the dash or `CMakeLists.txt`. Thresholds in it are first guesses (see the header).
+- Track position is the centroid of the visible points, so for large objects it sits on the near face, not the centre. Position error against CARLA's actor centre includes that bias.
+- Velocities are relative to the kart (no ego-motion compensation) while the bridge's ground-truth velocities are world-frame, so compare them only with the kart stationary.
+- CARLA ground truth has no occlusion information, so objects hidden behind others count as misses in live mode. The synthetic scene counts only objects with at least 3 ray hits.
+- CARLA delivers partial rotations per tick; the harness merges the last 0.25 s of returns into one revolution, which a real STL-27L does not need.
+
+## Lane assist (experimental)
+
+The TwinLiteNet lane node and the closed-loop CARLA driver live in [experimental_lane_assist/](./experimental_lane_assist/README.md).
+
+## Emergency braking and following (experimental)
+
+Lidar-first braking/following with YOLO classes and the lane node's geometry: [experimental_emergency_braking_following/](./experimental_emergency_braking_following/README.md).

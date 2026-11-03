@@ -98,3 +98,8 @@ venv/
 *.param
 *.bin
 /models/
+
+# Experimental lane assist run output (frames, CSVs, summaries) and bytecode
+/tools/experimental_lane_assist/runs/
+/tools/experimental_emergency_braking_following/runs/
+/tools/_out/
