@@ -141,9 +141,57 @@ python ml_camera_harness.py --backend ncnn \
 - Port 5600 is shared with the dash. Close the dash, or start the bridge with `--cam-port 5610` and the harness with `--port 5610`.
 - `--no-yolo` / `--no-seg` skip a model. For `ncnn`, a model is skipped when its files are not given.
 - `--folder DIR [--loop]` replays saved images (repeatable runs, torch vs NCNN comparison). `--save-dir DIR` writes annotated frames. `--no-display` is headless and only prints per-frame timings.
+- `--camera 0` reads directly from a USB webcam with OpenCV instead of UDP. It is also available in
+  `experimental_lane_assist/seg_lane_node.py` and `experimental_emergency_braking_following/eb_vision_node.py`.
+  Run one process per camera for now; multiple processes may not be able to open the same webcam.
+  For example, from `tools/`, with the exported Nano model:
+
+  ```bash
+  python ml_camera_harness.py --backend ncnn --camera 0 --no-yolo --no-display \
+    --seg-param twinlite_ncnn/out/nano_384x640.ncnn.param \
+    --seg-bin twinlite_ncnn/out/nano_384x640.ncnn.bin --seg-width 640 --seg-height 384
+  ```
+
+  This tests inference, not model accuracy: the current segmentation preprocessing stretches frames
+  rather than using the letterboxing used for the TwinLiteNetPlus parity check.
+- Add `--profile-seg --max-frames 150` to report median and p95 timings for input wait,
+  segmentation preprocessing, both ncnn output extractions, mask postprocessing, rendering/output,
+  and the full frame loop. The first five frames are excluded by default (`--profile-warmup` changes this);
+  reports use up to the latest 1000 frames. Input wait includes camera/UDP wait and decoding,
+  not sensor exposure or the age of an already-buffered frame. ncnn evaluates lazily during extraction;
+  the two output extractions share intermediate computation and are timed together.
+- Use `--profile-yolo` for the same breakdown for ncnn YOLO; it can also be combined with
+  `--profile-seg`. The YOLO-FastestV2 repository's bundled `sample/ncnn/model/` files use
+  `--yolo-in input.1 --yolo-out 794,796` and the repository's `data/coco.data`; other
+  exports may use different blob names.
 - Other options: `--device cuda` (torch), `--yolo-conf`, `--seg-width/--seg-height` (default 640x360), `--all-classes` (show every COCO class).
 - NCNN blob names: `--yolo-in`, `--yolo-out` (comma separated, stride 16 then 32), `--seg-in`, `--seg-out-da`, `--seg-out-ll`. Defaults are guesses, so set them to match your converted model.
 - Timings are desktop-relative only. Measure real speed on the Pi 5.
+
+### TwinLiteNetPlus BDD validation
+
+The [parity and validation script](./twinlite_ncnn/parity_check.py) can use separate directories
+for images and the authors' drivable-area and lane-line PNG annotations. For example:
+
+```bash
+cd twinlite_ncnn
+../.venv-ml/bin/python parity_check.py --config nano \
+  --images /path/to/bdd100k_images_100k/100k/val \
+  --da-labels /path/to/da_seg_annotations/bdd_seg_gt/val \
+  --ll-labels /path/to/ll_seg_annotations/bdd_lane_gt/val \
+  --limit 50
+```
+
+Omit `--limit` for the whole validation set. The limit selects files in sorted order, not a random
+sample. The script compares the original and converted models on up to eight images, then evaluates
+each selected labelled image for both models. It matches the upstream preprocessing and metric
+formulas but averages per image (equivalent to upstream validation with batch size 1); the upstream
+default batch size is 16. The reported subset results aren't directly comparable to the full paper
+results. The script errors on missing labels rather than silently skipping images.
+For another fixed-size export, pass matching `--height` and `--width` to the evaluator.
+It removes the letterbox padding from the predicted class masks, then uses nearest-neighbor
+resize to score them against the same 640x360 labels. This differs from upstream's native
+384x640 evaluation; use the same images and settings when comparing resolutions.
 
 Notes and caveats:
 - The torch YOLO path was checked against the repo's own `img/000139_result.png`: same boxes and scores. YOLO takes the BGR image as is (no colour swap), TwinLiteNet takes RGB, both scaled 0..1.

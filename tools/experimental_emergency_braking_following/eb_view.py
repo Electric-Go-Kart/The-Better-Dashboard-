@@ -29,6 +29,7 @@ def main():
     ap.add_argument("--range", type=float, default=20.0, help="m shown ahead")
     ap.add_argument("--size", type=int, default=800, help="window height in px")
     ap.add_argument("--save-dir")
+    ap.add_argument("--stale-after", type=float, default=1.0, help="local receive timeout, seconds")
     a = ap.parse_args()
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -47,14 +48,20 @@ def main():
         return int(ox + y * ppm), int(oy - x * ppm)
 
     n = 0
-    print(f"waiting for eb_drive.py on UDP {a.port} ...")
+    print(f"waiting for planner debug data on UDP {a.port} ...")
+    m = None
+    received_at = None
     while True:
         try:
             m = json.loads(sock.recv(65535))
+            received_at = time.monotonic()
         except socket.timeout:
-            continue
+            pass
         except ValueError:
             continue
+        if m is None:
+            continue
+        age = time.monotonic() - received_at
         img = np.full((H, W, 3), 30, np.uint8)
         for r in range(5, int(a.range) + 1, 5):
             cv2.line(img, px(r, -side), px(r, side), (50, 50, 50), 1)
@@ -110,9 +117,14 @@ def main():
         lines = [f"{m['state']}", f"v {m['v']:.1f} -> {m['v_target']:.1f} m/s",
                  f"a_req {a_req:.1f}" if a_req is not None else "a_req -",
                  f"gap {m['gap']:.1f} m" if m["gap"] is not None else "gap -", f"nudge {m['nudge']:+.2f} m",
-                 f"tracks {len(m['tracks'])}  boxes {len(m['boxes'])}", f"age {time.time() - m['t']:.2f} s"]
+                 f"tracks {len(m['tracks'])}  boxes {len(m['boxes'])}",
+                 f"link {'STALE' if age > a.stale_after else 'live'} {age:.2f} s"]
+        if "steer" in m:
+            lines.extend([f"{m.get('mode', '?')} / {m.get('control', '?')}",
+                          f"recommend steer {m['steer']:+.2f}",
+                          f"throttle {m['throttle']:.2f} brake {m['brake']:.2f}"])
         for i, s in enumerate(lines):
-            c = (0, 0, 255) if m["state"] in ("AEB", "LIDAR-LOST") else (230, 230, 230)
+            c = (0, 0, 255) if m["state"] in ("AEB", "LIDAR-LOST") or age > a.stale_after else (230, 230, 230)
             cv2.putText(img, s, (10, 22 + 20 * i), cv2.FONT_HERSHEY_SIMPLEX, 0.55, c, 1)
         cv2.imshow("eb view", img)
         if a.save_dir:

@@ -10,8 +10,8 @@ Run with tools/.venv-ml:
 Reports:
   1. patched-vs-upstream torch logits (must be ~1e-5, proves the CAAM rewrite is equivalent)
   2. ncnn-vs-torch logits and argmax mask agreement (FP32 should be ~99.9+%)
-  3. with --bdd-root: DA mIoU, LL accuracy, LL IoU (the metrics reported in the TwinLiteNet / TwinLiteNetPlus
-     papers, computed the way upstream val.py does: per-image, averaged, prediction cropped [12:-12]),
+  3. with labels: DA mIoU, LL accuracy, LL IoU using upstream val.py's preprocessing and formulas,
+     calculated per image and averaged (equivalent to upstream with batch_size=1),
      for torch and ncnn, plus ncnn ms/frame.
 """
 import argparse
@@ -42,10 +42,12 @@ def letterbox(im, new_shape, color=(114, 114, 114)):
     return cv2.copyMakeBorder(im, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)
 
 
-def preprocess(path, h, w):
+def preprocess(path, h, w, expected_shape=None):
     img = cv2.imread(path)
     if img is None:
         raise FileNotFoundError(path)
+    if expected_shape is not None and img.shape[:2] != expected_shape:
+        raise ValueError(f"{path}: expected image shape {expected_shape}, got {img.shape[:2]}")
     img = letterbox(img, (h, w))
     chw = np.ascontiguousarray(img[:, :, ::-1].transpose(2, 0, 1), dtype=np.float32) / 255.0
     return chw
@@ -58,14 +60,17 @@ class NcnnModel:
         self.net = ncnn.Net()
         self.net.opt.num_threads = threads
         self.net.opt.use_vulkan_compute = False
-        self.net.load_param(param)
-        self.net.load_model(binf)
+        if self.net.load_param(param) != 0 or self.net.load_model(binf) != 0:
+            raise RuntimeError(f"Failed to load ncnn model: {param}, {binf}")
 
     def __call__(self, chw):
         ex = self.net.create_extractor()
-        ex.input("in0", self.ncnn.Mat(chw).clone())
-        _, a = ex.extract("out0")
-        _, b = ex.extract("out1")
+        if ex.input("in0", self.ncnn.Mat(chw).clone()) != 0:
+            raise RuntimeError("Failed to set ncnn input in0")
+        status_a, a = ex.extract("out0")
+        status_b, b = ex.extract("out1")
+        if status_a != 0 or status_b != 0:
+            raise RuntimeError(f"Failed to extract ncnn outputs: out0={status_a}, out1={status_b}")
         return np.array(a), np.array(b)
 
 
@@ -82,7 +87,7 @@ def set_caam(patched):
 
 
 class Metric:
-    """Per-image metrics exactly as upstream IOUEval.SegmentationMetric / utils.val."""
+    """Upstream metric formulas averaged per image (equivalent to validation batch size 1)."""
 
     def __init__(self):
         self.da_miou, self.ll_acc, self.ll_iou = [], [], []
@@ -95,24 +100,28 @@ class Metric:
     def add(self, da_pred, da_gt, ll_pred, ll_gt):
         c = self.cm(da_pred, da_gt)
         union = c.sum(1) + c.sum(0) - np.diag(c)
-        iou = np.nan_to_num(np.diag(c) / union)
+        iou = np.divide(np.diag(c), union, out=np.zeros_like(union), where=union != 0)
         self.da_miou.append(iou.mean())
 
         c = self.cm(ll_pred, ll_gt)
         tp, fp, fn, tn = c[1, 1], c[0, 1], c[1, 0], c[0, 0]
         self.ll_acc.append((tp / (tp + fn + 1e-12) + tn / (tn + fp + 1e-12)) / 2)
         union = c.sum(1) + c.sum(0) - np.diag(c)
-        self.ll_iou.append(np.nan_to_num(np.diag(c) / union)[1])
+        self.ll_iou.append(np.divide(np.diag(c), union, out=np.zeros_like(union), where=union != 0)[1])
 
     def summary(self):
         return (float(np.mean(self.da_miou)), float(np.mean(self.ll_acc)), float(np.mean(self.ll_iou)))
 
 
-def load_gt(img_path):
-    da = cv2.imread(img_path.replace("images", "drivable_area_annotations").replace("jpg", "png"), 0)
-    ll = cv2.imread(img_path.replace("images", "lane_line_annotations").replace("jpg", "png"), 0)
-    if da is None or ll is None:
-        return None
+def load_gt(img_path, da_dir, ll_dir):
+    name = os.path.splitext(os.path.basename(img_path))[0] + ".png"
+    da_path, ll_path = os.path.join(da_dir, name), os.path.join(ll_dir, name)
+    da = cv2.imread(da_path, 0)
+    ll = cv2.imread(ll_path, 0)
+    if da is None:
+        raise FileNotFoundError(f"Missing or unreadable drivable-area label: {da_path}")
+    if ll is None:
+        raise FileNotFoundError(f"Missing or unreadable lane-line label: {ll_path}")
     # Upstream: resize to (640, 360), class 1 where value > 1
     da = (cv2.resize(da, (W_, 360)) > 1).astype(np.int64)
     ll = (cv2.resize(ll, (W_, 360)) > 1).astype(np.int64)
@@ -120,7 +129,18 @@ def load_gt(img_path):
 
 
 def masks(da, ll):
-    return da.argmax(0)[12:-12], ll.argmax(0)[12:-12]
+    """Unpad 16:9 BDD masks and resize class predictions to the 640x360 labels."""
+    result = []
+    for output in (da, ll):
+        if output.ndim != 3 or output.shape[0] != 2:
+            raise ValueError(f"Expected segmentation output [2,H,W], got {output.shape}")
+        h, w = output.shape[1:]
+        scale = min(h / 720, w / 1280)
+        nw, nh = round(1280 * scale), round(720 * scale)
+        left, top = round((w - nw) / 2 - 0.1), round((h - nh) / 2 - 0.1)
+        mask = output.argmax(0).astype(np.uint8)[top:top + nh, left:left + nw]
+        result.append(cv2.resize(mask, (W_, 360), interpolation=cv2.INTER_NEAREST))
+    return tuple(result)
 
 
 def main():
@@ -134,12 +154,26 @@ def main():
     ap.add_argument("--bin")
     ap.add_argument("--images", help="folder of jpg/png for parity (default: repo inference/images)")
     ap.add_argument("--bdd-root", help="BDD100K root containing images/val and the two annotation folders")
+    ap.add_argument("--da-labels", help="directory of author-provided drivable-area PNG masks")
+    ap.add_argument("--ll-labels", help="directory of author-provided lane-line PNG masks")
     ap.add_argument("--limit", type=int, default=0, help="max images (0 = all)")
     ap.add_argument("--threads", type=int, default=4)
     args = ap.parse_args()
 
-    if (args.height, args.width) != (H_, W_) and args.bdd_root:
-        sys.exit("BDD100K metrics assume 384x640 (labels are cropped [12:-12]); use the default size for them")
+    if bool(args.da_labels) != bool(args.ll_labels):
+        ap.error("--da-labels and --ll-labels must be provided together")
+    if args.bdd_root and (args.images or args.da_labels):
+        ap.error("--bdd-root cannot be combined with --images or explicit label directories")
+    if args.da_labels and not args.images:
+        ap.error("explicit label directories require --images")
+    if args.limit < 0:
+        ap.error("--limit must be non-negative")
+    if args.bdd_root:
+        args.da_labels = os.path.join(args.bdd_root, "drivable_area_annotations", "val")
+        args.ll_labels = os.path.join(args.bdd_root, "lane_line_annotations", "val")
+
+    if args.height <= 0 or args.width <= 0:
+        ap.error("--height and --width must be positive")
 
     stem = f"{args.config}_{args.height}x{args.width}"
     param = args.param or f"out/{stem}.ncnn.param"
@@ -155,12 +189,24 @@ def main():
     if not files:
         sys.exit("no images found")
     print(f"{len(files)} images")
+    if args.da_labels:
+        for folder in (args.da_labels, args.ll_labels):
+            if not os.path.isdir(folder):
+                sys.exit(f"label directory not found: {folder}")
+        for image in files:
+            name = os.path.splitext(os.path.basename(image))[0] + ".png"
+            for folder in (args.da_labels, args.ll_labels):
+                path = os.path.join(folder, name)
+                if not os.path.isfile(path):
+                    sys.exit(f"missing label: {path}")
 
     torch.set_num_threads(args.threads)
     model = load_model(args.repo, args.config, args.weight, patched=False)
     ncnn_model = NcnnModel(param, binf, args.threads)
 
-    inputs = [preprocess(f, args.height, args.width) for f in files[:8 if not args.bdd_root else 8]]
+    expected_shape = (720, 1280) if args.da_labels else None
+    inputs = [preprocess(f, args.height, args.width, expected_shape) for f in files[:8]]
+    print(f"Parity check: {len(inputs)} images")
 
     # 1) upstream vs patched torch
     set_caam(False)
@@ -194,22 +240,21 @@ def main():
     print(f"    ncnn {args.threads} threads: median {np.median(ts):.1f} ms  p95 {np.percentile(ts, 95):.1f} ms  (this machine)")
 
     # 3) paper metrics
-    if args.bdd_root:
+    if args.da_labels:
         mt, mn = Metric(), Metric()
         t0 = time.time()
         for i, f in enumerate(files):
-            gt = load_gt(f)
-            if gt is None:
-                continue
-            x = preprocess(f, args.height, args.width)
+            gt = load_gt(f, args.da_labels, args.ll_labels)
+            x = preprocess(f, args.height, args.width, expected_shape)
             da_t, ll_t = masks(*torch_forward(model, x))
             da_n, ll_n = masks(*ncnn_model(x))
             mt.add(da_t, gt[0], ll_t, gt[1])
             mn.add(da_n, gt[0], ll_n, gt[1])
             if (i + 1) % 100 == 0:
                 print(f"    {i + 1}/{len(files)}  {time.time() - t0:.0f}s", flush=True)
-        print("[3] BDD100K val metrics            DA mIoU   LL Acc    LL IoU")
-        for name, m in (("torch", mt), ("ncnn FP32", mn)):
+        print(f"[3] Metrics on {len(mt.da_miou)} images (per-image average; upstream batch size 1)")
+        print("                                   DA mIoU   LL Acc    LL IoU")
+        for name, m in (("torch", mt), ("ncnn", mn)):
             a, b, c = m.summary()
             print(f"    {name:<30} {a * 100:7.2f}   {b * 100:7.2f}   {c * 100:7.2f}")
 

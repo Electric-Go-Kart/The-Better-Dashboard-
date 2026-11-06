@@ -634,6 +634,8 @@ def main():
     ap.add_argument("--device", default="cpu")
     ap.add_argument("--port", type=int, default=5600)
     ap.add_argument("--folder")
+    ap.add_argument("--camera", type=int, help="read directly from an OpenCV camera index, e.g. 0")
+    ap.add_argument("--latest-frame", action="store_true", help="discard queued older UDP camera frames")
     ap.add_argument("--loop", action="store_true")
     ap.add_argument("--ros", action="store_true", help="publish --state-topic via rclpy")
     ap.add_argument("--ros-image", help="read frames from this sensor_msgs/Image topic instead of UDP")
@@ -693,8 +695,11 @@ def main():
     s.add_argument("--seg-out-ll", default="out1")
     s.add_argument("--seg-width", type=int, default=640)
     s.add_argument("--seg-height", type=int, default=360)
+    s.add_argument("--seg-letterbox", action="store_true", help="letterbox ncnn input and remove padding from masks")
     s.add_argument("--seg-threads", type=int, default=2)
     a = ap.parse_args()
+    if a.camera is not None and (a.folder or a.ros_image):
+        ap.error("--camera cannot be combined with --folder or --ros-image")
 
     if a.selftest:
         sys.exit(selftest(a))
@@ -707,10 +712,12 @@ def main():
     ros = RosIO(a.ros_image, a.state_topic) if (a.ros or a.ros_image) else None
     if a.ros_image:
         source = ros.frames()
+    elif a.camera is not None:
+        source = ml.frames_camera(a.camera)
     elif a.folder:
         source = ml.frames_folder(a.folder, a.loop)
     else:
-        source = ml.frames_udp(a.port)
+        source = ml.frames_udp(a.port, latest=True) if a.latest_frame else ml.frames_udp(a.port)
 
     odom = WheelOdom(a.odom_port, a.track_width) if a.odom_port else None
     import json
@@ -766,6 +773,7 @@ def main():
         n += 1
         if a.max_frames and n >= a.max_frames:
             break
+    source.close()
 
 
 if __name__ == "__main__":

@@ -27,6 +27,8 @@ def main():
     ap.add_argument("--backend", choices=("torch", "ncnn"), default="torch")
     ap.add_argument("--device", default="cpu", help="torch device, e.g. cpu or cuda")
     ap.add_argument("--port", type=int, default=5606, help="UDP port of the camera stream")
+    ap.add_argument("--camera", type=int, help="read directly from an OpenCV camera index, e.g. 0")
+    ap.add_argument("--latest-frame", action="store_true", help="discard queued older UDP camera frames")
     ap.add_argument("--out-port", type=int, default=5607)
     ap.add_argument("--out-host", default="127.0.0.1")
     ap.add_argument("--yolo-repo", default=str(ml.MODELS_DIR / "yolo/Yolo-FastestV2"))
@@ -45,7 +47,9 @@ def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     dest = (a.out_host, a.out_port)
     n, busy, t_rep = 0, 0.0, time.time()
-    for _, img in ml.frames_udp(a.port):
+    source = (ml.frames_camera(a.camera) if a.camera is not None else
+              ml.frames_udp(a.port, latest=True) if a.latest_frame else ml.frames_udp(a.port))
+    for _, img in source:
         t0 = time.perf_counter()
         dets = [d for d in yolo.infer(img) if d[1] in ml.COCO_TO_BEV]
         busy += time.perf_counter() - t0
@@ -64,6 +68,7 @@ def main():
         if time.time() - t_rep > 5.0:
             print(f"yolo {1000 * busy / n:5.1f} ms/frame, {n / (time.time() - t_rep):4.1f} fps, {len(boxes)} boxes last frame")
             n, busy, t_rep = 0, 0.0, time.time()
+    source.close()
 
 
 if __name__ == "__main__":
