@@ -102,7 +102,7 @@ Notes and risks:
 - NMS in-app, conf threshold 0.35 default, tunable (`DASH_YOLO_CONF`).
 - Output: 2D boxes with class and confidence per camera.
 
-### 4.4 TwinLiteNet Nano (INT8, QAT)
+### 4.4 TwinLiteNetPlus Nano (INT8, QAT)
 - **Model:** TwinLiteNet(Plus) **Nano**, trained with quantization-aware training (QAT), deployed as **INT8** in NCNN. This is the primary model, not a fallback.
 - Input ~360x640 (tunable down to 288x512), two output heads: drivable area, lane lines.
 - **Export path (offline only; ONNX never ships on the Pi):** QAT PyTorch model -> fold fake-quant into weights/scales -> ONNX/PNNX -> NCNN FP32 `.param/.bin` -> `ncnn2int8` with a calibration table. **Risk:** `onnx2ncnn`/PNNX do not consume QDQ nodes directly, and NCNN INT8 uses its own per-layer scale table. Plan: export the QAT weights, then build the NCNN table from the QAT-learned activation scales (or re-run NCNN's calibration on a QAT model, which is robust to it). Early spike required; compare INT8 NCNN output to the PyTorch fake-quant reference.
